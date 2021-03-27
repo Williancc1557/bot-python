@@ -8,4 +8,4 @@
  
 ## Lista de Tarefas 
 
- - [] Separar o Fênix em __Arquivos!__
+ - [ ] Separar o Fênix em __Arquivos!__
