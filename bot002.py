@@ -1,0 +1,2214 @@
+import discord
+import asyncio
+from discord.ext import commands
+import random
+from discord.ext.commands.cooldowns import BucketType
+import datetime
+import psycopg2
+
+from time import sleep
+
+
+from Principais.principais import Avaliar, bot, Avatar, Invite, mydb
+from moderacao.Moderacao import Mute, Ban, Unban, Unmute, Warn, Warn_remove, Check_warns, Limpar, Embed
+from events.events import On_ready, On_command_error, On_message, On_guild_remove, On_member_join, On_guild_join
+from Diversao.diversao import Desafiar, Coinflip
+from Economia.economia import Criar_conta, Conta, Desc_edit, Transferir, Diaria, Cor, Roubar, Arma, Fenicoins
+
+
+
+intents = discord.Intents.default()
+intents.members = True
+x = datetime.datetime.now()
+
+bot = bot
+mydb = mydb
+
+bot.remove_command("help")
+prefix = 'f!'
+color = 0x0000FF
+
+
+
+
+
+async def manutenção(ctx):
+
+    await ctx.reply('<:error:788824695184424980>| Esse comando foi **Desativado** temporariamente pela equipe de suporte do fênix!')
+    return False
+
+
+
+def check_ban(ctx):
+    sqlinsert3 = f'SELECT idban FROM ban WHERE idban = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+
+
+    if valores_lidos3 == None:
+        return True
+    else:
+        return False
+
+
+
+@bot.event
+@commands.guild_only()
+@commands.check(check_ban)
+async def on_ready():
+   return await On_ready()
+
+
+
+
+
+t = BucketType.default
+
+
+
+@bot.event
+@commands.guild_only()
+@commands.check(check_ban)
+async def on_command_error(ctx, error):
+    return await On_command_error(ctx,error=error)
+
+
+
+@bot.event
+@commands.guild_only()
+@commands.check(check_ban)
+
+async def on_message(message):
+    return await On_message(message)
+
+
+
+
+
+
+
+
+#Girar moeda
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def coinflip(ctx, bet: str = None):
+    return await Coinflip(ctx, bet=bet)
+
+
+
+
+
+
+
+
+                                         #BANIR
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def ban(ctx, member: discord.Member, *, reason = '*Motivo não especificado*'):
+    return await Ban(ctx, member=member, reason=f'{reason}')
+
+@ban.error
+async def on_ban_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+         await ctx.reply(
+            '<:error:788824695184424980>| **Reescreva** o comando no seguinte formato `f!ban <@user> <Motivo>`')
+
+    if isinstance(error, commands.MemberNotFound):
+        await ctx.reply(f'<:error:788824695184424980>| Não encontrei o `{error.argument}` em lugar algum!')
+
+
+
+
+
+                                                        #desbanir
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def unban(ctx, id: int):
+    await Unban(ctx, id=id)
+
+@unban.error
+async def on_unban_error(ctx, error):
+
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.reply('<:error:788824695184424980>| **Reescreva** o comando no seguinte formato `f!unban <user_id>`')
+
+                                                   #convidar o bot
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 40, commands.BucketType.user)
+async def invite(ctx):
+    await Invite(ctx)
+
+
+@invite.error
+async def invite(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('**<:error:788824695184424980>| {} Você Precisa Esperar `{:.0f} Segundos` Para Dar O Comando Novamente**'.format(ctx.author.mention ,error.retry_after))
+
+
+                                                 #mutar alguém:
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=None):
+    await Mute(ctx, member, mute_minutes, unit)
+
+
+
+
+bot.reactionsm = {}
+
+@bot.command(name='welcome', aliases=['bemvindo', 'BemVindo', 'BEMVINDO'])
+@commands.guild_only()
+@commands.check(check_ban)
+async def welcome(ctx):
+        if ctx.message.author.guild_permissions.administrator or ctx.author == ctx.guild.owner:
+            pass
+        else:
+            return await ctx.reply('<:error:788824695184424980>| Você não possui a permissão de **Administrador!**')
+
+        embed = discord.Embed(
+               title='*** Olá, meu nome é Fênix 🐦***',
+               description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
+                           '\n'
+                           '\n'
+                           '**<a:feliz:815313006937899009> Mensagens De Bem Vindo **\n'
+                           '\n'
+                           '\n'
+                           '\n'
+                           '<a:number_1:815207357751361536> **: Primeira Mensagem**\n'
+                           '\n'
+                           '<a:number_2:815207379988905994> **: Segunda Mensagem**\n'
+                           '\n'
+                           '<a:number_3:815207399686144030> **: Terceira Mensagem**\n'
+                           '\n'
+                           '<a:number_4:815207421316300840> **: Quarta mensagem**\n'
+                           '\n'
+                           '<:error:788824695184424980> **: Apagar Configuração**\n ㅤㅤ',
+               color=0x00BFFF)
+        embed.set_thumbnail(
+               url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
+
+
+        msg = await ctx.reply(ctx.author.mention, embed=embed)
+
+        await msg.add_reaction('<a:number_1:815207357751361536>')
+        await msg.add_reaction('<a:number_2:815207379988905994>')
+        await msg.add_reaction('<a:number_3:815207399686144030>')
+        await msg.add_reaction('<a:number_4:815207421316300840>')
+        await msg.add_reaction('<:error:788824695184424980>')
+
+        bot.reactionsm[str(msg.id)] = ctx.author
+
+        await asyncio.sleep(250)
+
+        await msg.delete()
+        bot.reactionsm.pop(str(msg.id))
+
+
+
+
+
+           #desmutar alguém:
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def unmute(ctx, member: discord.Member = None):
+    await Unmute(ctx, member=member)
+                                        #. . . . . . .
+
+
+
+
+
+
+
+
+
+
+
+
+                                           #APAGAR MENSAGENS EM MASSA
+
+
+
+@bot.command(pass_context=True, name='limpar',aliases=['clean', 'clear'])
+@commands.guild_only()
+@commands.cooldown(1, 3.5, commands.BucketType.user)
+async def limpar(ctx, amount: int = None):
+  await Limpar(ctx, amount=amount)
+
+
+
+@limpar.error
+async def ajuda_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('<:error:788824695184424980>| {} Você Precisa Esperar  **Milissegundos** Para Dar O Comando Novamente'.format(ctx.author.mention, error.retry_after))
+
+
+
+
+
+
+
+
+
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    await Avatar(ctx, member)
+
+
+
+
+
+
+
+
+
+
+@bot.command()
+@commands.check(check_ban)
+@commands.guild_only()
+async def warn(ctx, member: discord.Member = None, *, motivo: str = 'Motivo Não Especificado!'):
+    return await Warn(ctx, member=member, motivo=motivo)
+
+
+
+
+@warn.error
+async def warn_error(ctx, error):
+                if isinstance(error, commands.MemberNotFound):
+                    await ctx.channel.send(
+                        f'<:error:788824695184424980>| Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto, mas acabei não o encontrando')
+
+
+
+
+
+
+
+@bot.command(name='warn_remove', aliases=['remove_warn', 'warn_r', 'REMOVE_WARN'])
+@commands.check(check_ban)
+@commands.guild_only()
+async def warn_remove(ctx, member: discord.Member = None):
+    await Warn_remove(ctx, member=member)
+
+
+
+@warn_remove.error
+async def warn_remove_error(ctx, error):
+                if isinstance(error, commands.MemberNotFound):
+                    await ctx.channel.send(
+                        f'<:error:788824695184424980>| Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto, mas acabei não o encontrando')
+
+
+
+
+
+
+
+
+
+
+@bot.command(name='check_warns', aliases=['warns_check', 'w_c', 'check_warn'])
+@commands.check(check_ban)
+@commands.guild_only()
+async def check_warns(ctx, member: discord.Member = None):
+    await Check_warns(ctx, member=member)
+
+
+
+
+
+
+
+
+
+
+
+@check_warns.error
+async def check_warns_error(ctx, error):
+                if isinstance(error, commands.MemberNotFound):
+                    await ctx.channel.send(
+                        f'<:error:788824695184424980>| Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto, mas acabei não o encontrando')
+
+                    #Criar embed
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def embed(ctx):
+      await Embed(ctx)
+
+
+
+
+                                                     #painel de ajuda:
+
+bot.reactions = {}
+@bot.command(name='ajuda', aliases=['help', 'Help', 'HELP'])
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 15, commands.BucketType.user)
+async def ajuda(ctx):
+    embed = discord.Embed(
+        title='*** Olá, meu nome é Fênix 🐦***',
+        description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
+                    '\n'
+                    '\n'
+                    '**👮 Servidor Para Suporte**\n'
+                    '[Clique aqui](https://discord.gg/VDTAt3Qb9X) para entrar no servidor de suporte!\n'
+                    '\n'
+                    '\n'
+                    '<a:emoji_42:815378184219918336> **: Comandos Principais**\n'
+                    '\n'
+                    '<a:emoji_44:815378316617580575> **: Comandos De Diversão**\n'
+                    '\n'
+                    '<a:emoji_43:815378237563207680> **: Comandos De Economia**\n'
+                    '\n'
+                    '<a:emoji_45:815378376528887859> **: Comandos Para Moderadores**\n'
+                    '\n'
+                    '<a:seta:796356802760933387> **: Pagina Inicial**\n ㅤㅤ',
+        color=0x00BFFF)
+    embed.set_thumbnail(
+        url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+
+    global msg
+    msg = await ctx.reply(ctx.author.mention, embed=embed)
+
+    await msg.add_reaction('<a:emoji_42:815378184219918336>')
+    await msg.add_reaction('<a:emoji_44:815378316617580575>')
+    await msg.add_reaction('<a:emoji_43:815378237563207680>')
+    await msg.add_reaction('<a:emoji_45:815378376528887859>')
+    await msg.add_reaction('<a:seta:796356802760933387>')
+
+    bot.reactions[str(msg.id)] = ctx.author
+
+    await asyncio.sleep(200)
+
+    await msg.delete()
+    bot.reactions.pop(str(msg.id))
+
+@ajuda.error
+async def ajuda_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('**<:error:788824695184424980>| {} Você Precisa Esperar `{:.0f} Segundos` Para Dar O Comando Novamente**'.format(ctx.author.mention, error.retry_after))
+
+
+
+                                                      #Avaliar o bot
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 7200, commands.BucketType.user)
+async def avaliar(ctx):
+    await Avaliar(ctx)
+
+
+@avaliar.error
+async def avaliar_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('**<:error:788824695184424980>| {} Você Precisa Esperar `{:.0f} Segundos` Para Dar O Comando Novamente**'.format(ctx.author.mention ,error.retry_after))
+
+
+                                                                 #Desafiar o fênix:
+
+cursor = mydb.cursor()
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.check(manutenção)
+@commands.cooldown(1, 70, commands.BucketType.channel)
+async def desafiar(ctx, unit=None):
+  return await Desafiar(ctx, unit=unit)
+
+
+@desafiar.error
+async def desafiar_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('**<:error:788824695184424980>| {} Esse canal precisa esperar `{:.0f} Segundos` Para Dar O Comando `f!desafiar fênix`Novamente**'.format(ctx.author.mention, error.retry_after))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+print(f'\033[1;35m{mydb}\033[m')
+
+
+#CRIAR CONTA
+
+
+
+@bot.command(name='criar_conta',aliases=['criar', 'create'])
+@commands.guild_only()
+@commands.check(check_ban)
+async def criar_conta(ctx):
+    await Criar_conta(ctx)
+
+                   #OLHAR A CONTA
+
+
+
+@bot.command(name='conta',aliases=['cont', 'con', 'account', 'CONTA'])
+@commands.guild_only()
+@commands.check(check_ban)
+async def conta(ctx,  member: discord.Member = None):
+    return await Conta(ctx, member=member)
+
+
+#EDITAR DESCRIÇÃO
+
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def desc_edit(ctx):
+    return await Desc_edit(ctx=ctx)
+
+
+
+                       #transferir dinheiro
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def transferir(ctx,  member: discord.Member = None, dinheiro: int = 10):
+    await Transferir(ctx, member=member, dinheiro=dinheiro)
+
+
+
+@transferir.error
+async def transferir_error(ctx, error):
+    if isinstance(error, commands.MemberNotFound):
+        await ctx.channel.send(
+            f'<:error:788824695184424980> Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto mas acabei não o encontrando')
+        ctx.command.reset_cooldown(ctx)
+
+@bot.command(name='diaria',aliases=['daily', 'diária', 'diario'])
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 86400, commands.BucketType.user)
+async def diaria(ctx):
+        await Diaria(ctx)
+
+
+
+@diaria.error
+async def diaria_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send(
+            '**<:error:788824695184424980> {} Você precisa esperar `{:.1f} horas` Para Dar O Comando `f!diaria`Novamente**'.format(ctx.author.mention, error.retry_after/3600))
+
+
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def cor(ctx):
+    await Cor(ctx)
+
+
+
+
+
+@bot.command(name='roubar',aliases=['rob'])
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 43200, commands.BucketType.user)
+async def roubar(ctx, member: discord.Member = None):
+    await Roubar(ctx, member=member)
+
+
+@roubar.error
+async def roubar_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send(
+            '**<:error:788824695184424980> {} Você precisa esperar `{:.1f}` **Horas** Para Dar O Comando `f!roubar` Novamente**'.format(ctx.author.mention, error.retry_after/3600))
+    if isinstance(error, commands.MemberNotFound):
+        await ctx.channel.send(
+            f'<:error:788824695184424980> Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto mas acabei não o encontrando!')
+        ctx.command.reset_cooldown(ctx)
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def arma(ctx):
+    await Arma(ctx)
+
+
+@bot.command(name='fenicoins', aliases=['feni', 'coins', 'fenic', 'coin'])
+@commands.guild_only()
+@commands.check(check_ban)
+async def fenicoins(ctx, member: discord.Member = None):
+    await Fenicoins(ctx, member=member)
+
+
+
+
+@bot.command(name='top_global', aliases=['global', 'top', 'top_g', 'top_'])
+@commands.guild_only()
+@commands.check(check_ban)
+async def top_global(ctx):
+    sqlinsert4 = f'select nome from dinheiro ORDER BY dinheiro desc'
+
+    cursor.execute(sqlinsert4)
+
+    valores_lidos4 = cursor.fetchall()
+
+    sqlinsert5 = f'select dinheiro from dinheiro ORDER BY dinheiro desc'
+
+    cursor.execute(sqlinsert5)
+
+    valores_lidos5 = cursor.fetchall()
+
+    for index, element in enumerate(valores_lidos5):
+        if index == 0:
+            num10 = element[0]
+        if index == 1:
+            num20 = element[0]
+        if index == 2:
+            num30 = element[0]
+            break
+
+    for index, element in enumerate(valores_lidos4):
+        if index == 0:
+            num1 = element[0]
+        if index == 1:
+            num2 = element[0]
+        if index == 2:
+            num3 = element[0]
+            break
+
+    embed = discord.Embed(title='<a:Top:815388123039006741>        Os Tops 3 no Ranking         <a:Top:815388123039006741>',
+                          description='',
+                          color=0x0000FF)
+    embed.set_thumbnail(
+        url='https://media.discordapp.net/attachments/788064370722340885/811621833484140555/edificio-de-banco-retro-dos-desenhos-animados-ou-tribunal-com-ilustracao-de-colunas-isolada-no-branc.png')
+    embed.add_field(name='<a:emoji_42:815378184219918336> no Ranking', value=f'{num1}\n**{num10}**', inline=True)
+    embed.add_field(name='<a:emoji_44:815378316617580575> no Ranking', value=f'{num2}\n**{num20}**', inline=True)
+    embed.add_field(name='<a:emoji_43:815378237563207680> no Ranking', value=f'{num3}\n**{num30}**', inline=True)
+    await ctx.reply(ctx.author.mention, embed=embed)
+
+
+
+
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 43200, commands.BucketType.member and commands.BucketType.user)
+async def roubar_banco(ctx, member1: discord.Member = None):
+    #DADOS
+     #DINHEIRO AUTOR
+    sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert2)
+
+    valores_lidos2 = cursor.fetchone()
+
+    # DINHEIRO DO MEMBER1
+    try:
+        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member1.id}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos3 = cursor.fetchone()
+    except:
+        pass
+
+     #ARMA DO AUTOR
+
+    sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert4)
+
+    valores_lidos4 = cursor.fetchone()
+
+    # ARMA DO MEMBER1
+    try:
+        sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {member1.id}'
+
+        cursor.execute(sqlinsert4)
+
+        valores_lidos5 = cursor.fetchone()
+    except:
+        pass
+
+    #erro de não possuir uma conta
+
+    try:
+        print(valores_lidos2[0])
+    except:
+        await ctx.channel.send(
+            embed=discord.Embed(title='<:error:788824695184424980> **Você não possui uma conta no fênix!!**',
+                                color=0xFF0000))
+        ctx.command.reset_cooldown(ctx)
+        return
+
+    try:
+        if ctx.author == member1:
+            return await ctx.channel.send('<:error:788824695184424980> **Você não pode roubar com si mesmo**')
+            ctx.command.reset_cooldown(ctx)
+
+    except:
+        pass
+
+
+
+
+    #tem certeza?
+
+    if 7 >= valores_lidos4[0] > 0:
+      print('teste')
+      if not member1:
+        embed = discord.Embed(description='**Tem certeza que deseja roubar o banco sozinho? **\n\nVocê pode roubar com até 2 pessoas, e ter mais chance de sucesso!')
+        embed.set_footer(text='escreva Sim ou Não')
+        await ctx.channel.send(embed=embed)
+
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        try:
+            msg25 = await bot.wait_for('message', timeout=100, check=check)
+        except asyncio.TimeoutError:
+            return await ctx.channel.send(
+                f'***Demorou De Mais Para Aceitar {ctx.author.mention}.***')
+            ctx.command.reset_cooldown(ctx)
+        else:
+            resposta25 = str(msg25.content).lower()
+
+        num = random.randint(1, 4)
+
+
+        if resposta25 == 'sim':
+
+            b = await ctx.channel.send(
+                embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
+                                    ))
+
+            await asyncio.sleep(10)
+
+            # possibilidades
+            if num == 1:
+                money1 = random.randint(2500, 15000)
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] + money1}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                embed1 = discord.Embed(description=f':white_check_mark:  Você conseguiu sair com a grana roubada! **Parabéns {ctx.author.name}!** <a:Top:815388123039006741>',
+                                       color=0x00FF00)
+                embed1.set_footer(text=f'Você recebeu {money1} fenicoins')
+
+                await ctx.channel.send(embed=embed1)
+                return await b.delete()
+
+            if num == 2:
+                money2 = random.randint(2500, 13000)
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money2}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                embed1 = discord.Embed(
+                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money2} fenicoins**',
+                    color=0xFF0000)
+                embed1.set_footer(text=f'Você perdeu {money2} fenicoins')
+
+                await ctx.channel.send(embed=embed1)
+                return await b.delete()
+
+            if num == 3:
+                money3 = random.randint(2500, 13000)
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money3}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                embed1 = discord.Embed(
+                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money3} fenicoins**',
+                    color=0xFF0000)
+                embed1.set_footer(text=f'Você perdeu {money3} fenicoins')
+
+                await ctx.channel.send(embed=embed1)
+                return await b.delete()
+
+
+            if num == 4:
+                money4 = random.randint(2500, 13000)
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money4}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                embed1 = discord.Embed(
+                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money4} fenicoins**',
+                    color=0xFF0000)
+                embed1.set_footer(text=f'Você perdeu {money4} fenicoins')
+
+                await ctx.channel.send(embed=embed1)
+                return await b.delete()
+        else:
+            await ctx.channel.send(':white_check_mark: **Roubo cancelado com sucesso!**')
+            ctx.command.reset_cooldown(ctx)
+            return
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não possui uma arma!**')
+        ctx.command.reset_cooldown(ctx)
+        return
+    sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {member1.id}'
+
+    cursor.execute(sqlinsert4)
+
+    valores_lidos5 = cursor.fetchone()
+
+
+    #roubar banco com algm
+
+    try:
+        print(valores_lidos3[0])
+    except:
+        await ctx.channel.send(
+            embed=discord.Embed(
+                title=f'<:error:788824695184424980> **O(a) {member1.name} não possui uma conta no fênix!!**',
+                color=0xFF0000))
+        ctx.command.reset_cooldown(ctx)
+        return
+
+    if 7 >= valores_lidos4[0] > 0 or 7 > valores_lidos5[0] > 0:
+
+
+
+      if member1:
+        embed = discord.Embed(description=f'Tem certeza que deseja roubar o banco com o(a) ***{member1.name}*** \n\nVocê pode roubar com até 2 pessoas, e ter mais chance de sucesso!',
+                              color=0x8A2BE2)
+        embed.set_footer(text='escreva Sim ou Não')
+        await ctx.channel.send(embed=embed)
+
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        try:
+            msg25 = await bot.wait_for('message', timeout=100.0, check=check)
+        except asyncio.TimeoutError:
+            return await ctx.channel.send(
+                f'***Demorou De Mais Para aceitar {ctx.author.mention}.***')
+            ctx.command.reset_cooldown(ctx)
+        else:
+            resposta25 = str(msg25.content).lower()
+
+        print(resposta25)
+
+
+
+        if resposta25 == 'sim':
+
+
+            #confirmação do member1
+
+            a = await ctx.channel.send(f'**<a:loading:785523240944664646> aguardando o(a) {member1.name} aceitar**')
+
+            embed = discord.Embed(
+                description=f'O(a) **{ctx.author}** quer assaltar um banco com você no servidor **{ctx.author.guild.name}**! \n\nAceita sim ou não? ',
+                color=0x8A2BE2)
+            embed.set_footer(text='escreva Sim ou Não')
+            try:
+                await member1.send(embed=embed)
+            except:
+                await ctx.channel.send(f'<:error:788824695184424980> **Parece que o privado do {member1.name} está privado!! não consigo continuar o roubo assim.')
+                return
+            def check(m):
+                return m.author == ctx.author and m.guild == None
+            try:
+                msg25 = await bot.wait_for('message', timeout=1000.0, check=check)
+            except asyncio.TimeoutError:
+                return await member1.send(
+                    f'***<:error:788824695184424980> Demorou De Mais Para Aceitar {ctx.author.mention}.***')
+                ctx.command.reset_cooldown(ctx)
+            else:
+                resposta26 = str(msg25.content).lower()
+
+            print(resposta26)
+
+            num1 = random.randint(1, 4)
+
+            if resposta26 == 'não':
+                await a.edit(content=f'<:error:788824695184424980> o(a) **{member1.name}** não aceitou!!')
+                ctx.command.reset_cooldown(ctx)
+                return
+
+
+            if resposta26 == 'sim':
+
+                #DIMINUIR RESISTÊNCIA DA ARMA
+
+                if 0 < valores_lidos4[0] <= 7 and 0 >= valores_lidos5[0]:
+                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+                elif 0 < valores_lidos5[0] <= 7 and 0 >= valores_lidos4[0]:
+                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos5[0] - 1}' WHERE id = {member1.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+                else:
+                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos5[0] - 1}' WHERE id = {member1.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+
+
+                await member1.send(embed=discord.Embed(title=':white_check_mark:   Roubo aceito com sucesso!',
+                                                       color=0x00FF00))
+                # possibilidades
+
+
+
+                if num1 == 1:
+
+                    await asyncio.sleep(3.5)
+
+                    await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
+
+                    await asyncio.sleep(3.5)
+
+                    b = await ctx.channel.send(embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
+                                                                   ))
+
+                    await asyncio.sleep(10)
+
+                    money1 = random.randint(4500, 16000)
+
+                    # Update do dinheiro do autor
+                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] + (money1 / 2)} WHERE id = {ctx.author.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+                    # update do dinheiro do member1
+                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] + (money1 / 2)} WHERE id = {member1.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+                    embed2 = discord.Embed(
+                        description=f':white_check_mark:  Vocês conseguiram sair com **{money1} fenicoins**  roubados! Cada um vai ficar com **{money1 / 2} fenicoins**! **Parabéns {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
+                        color=0x00FF00)
+
+                    await b.edit(embed=embed2)
+
+                elif num1 == 2:
+                        await asyncio.sleep(3.5)
+
+                        await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
+
+                        await asyncio.sleep(3.5)
+
+                        b = await ctx.channel.send(
+                            embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
+                                                ))
+
+                        await asyncio.sleep(10)
+
+                        money1 = random.randint(4500, 16000)
+
+                        # Update do dinheiro do autor
+                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] - (money1 / 2)} WHERE id = {ctx.author.id}"
+
+                        cursor.execute(sqlinsert)
+
+                        mydb.commit()
+
+                        # update do dinheiro do member1
+                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] - (money1 / 2)} WHERE id = {member1.id}"
+
+                        cursor.execute(sqlinsert)
+
+                        mydb.commit()
+
+                        embed2 = discord.Embed(
+                            description=f'<:error:788824695184424980>  Vocês perderam **{money1} fenicoins**  após pagar uma multa por tentar roubar o banco! Cada um vai perder **{money1 / 2} fenicoins**! **valeu a tentativa {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
+                            color=0xFF0000)
+
+                        await b.edit(embed=embed2)
+                elif num1 == 3:
+                        await asyncio.sleep(3.5)
+
+                        await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
+
+                        await asyncio.sleep(3.5)
+
+                        b = await ctx.channel.send(
+                            embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'))
+
+                        await asyncio.sleep(10)
+
+                        money1 = random.randint(4500, 16000)
+
+                        # Update do dinheiro do autor
+                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] - (money1 / 2)} WHERE id = {ctx.author.id}"
+
+                        cursor.execute(sqlinsert)
+
+                        mydb.commit()
+
+                        # update do dinheiro do member1
+                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] - (money1 / 2)} WHERE id = {member1.id}"
+
+                        cursor.execute(sqlinsert)
+
+                        mydb.commit()
+
+                        embed2 = discord.Embed(
+                            description=f'<:error:788824695184424980>  Vocês perderam **{money1} fenicoins**  após pagar uma multa por tentar roubar o banco! Cada um vai perder **{money1 / 2} fenicoins**! **valeu a tentativa {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
+                            color=0xFF0000)
+
+                        await b.edit(embed=embed2)
+                else:
+                    await asyncio.sleep(3.5)
+
+                    await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
+
+                    await asyncio.sleep(3.5)
+
+                    b = await ctx.channel.send(
+                        embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
+                                            ))
+
+                    await asyncio.sleep(10)
+
+                    money1 = random.randint(4500, 16000)
+
+                    # Update do dinheiro do autor
+                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] + (money1 / 2)} WHERE id = {ctx.author.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+                    # update do dinheiro do member1
+                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] + (money1 / 2)} WHERE id = {member1.id}"
+
+                    cursor.execute(sqlinsert)
+
+                    mydb.commit()
+
+                    embed2 = discord.Embed(
+                        description=f':white_check_mark:  Vocês conseguiram sair com **{money1} fenicoins**  roubados! Cada um vai ficar com **{money1 / 2} fenicoins**! **Parabéns {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
+                        color=0x00FF00)
+
+                    await b.edit(embed=embed2)
+            else:
+                await member1.send(embed=discord.Embed(title=':white_check_mark:   Roubo recusado com sucesso!',
+                                                       color=0x00FF00))
+                await a.delete()
+                await ctx.channel.send(embed=discord.Embed(title=f'<:error:788824695184424980> O **{member1.name}** não aceitou o roubo!',
+                                                       color=0xFF0000))
+                ctx.command.reset_cooldown(ctx)
+
+        else:
+            await ctx.channel.send('**<:error:788824695184424980> roubo cancelado**')
+            ctx.command.reset_cooldown(ctx)
+    else:
+        await ctx.channel.send('**<:error:788824695184424980> Parece que você não possui uma arma!**')
+        ctx.command.reset_cooldown(ctx)
+
+@roubar_banco.error
+async def banco_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.channel.send('**<:error:788824695184424980>| {} Você precisa esperar `{:.0f} Horas` Para Dar O Comando `f!roubar_banco`Novamente**'.format(ctx.author.mention, error.retry_after / 3600))
+
+
+bot.reactions_autor = {}
+bot.reactions_member = {}
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def apostar(ctx, member: discord.Member = None, dindin : int = None):
+
+
+    if member == ctx.author:
+        await ctx.channel.send('<:error:788824695184424980> Você não pode apostar fenicoins com **si mesmo**, seu bobinho.')
+        return
+
+    if not dindin and not member:
+        embed = discord.Embed(title='Comandin de aposta!!\n'
+                                                         '`f!apostar`',
+                                                   description='Esse comandinho serve para você apostar uns *fenicoins* com seu amiguinho!',
+                                                   color=0x00BFFF)
+        embed.add_field(name='📚 Como usar', value = '`f!apostar @WiLL 1000`')
+        await ctx.channel.send(embed=embed)
+        return
+
+    if not dindin:
+        await ctx.channel.send('<:error:788824695184424980> Você precisa escrever a **quantidade** de *fenicoins* que deseja apostar!!')
+        return
+
+
+    if dindin <= 10:
+        await ctx.channel.send('<:error:788824695184424980> Ai não da meu parceiro, tem q apostar **um pouquinho mais de fenicoins** *para eu poder cobrar aquela taxinha de entrada massa de 5%*.')
+        return
+
+
+    sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert2)
+
+    valores_lidos2 = cursor.fetchone()
+
+    try:
+        print(valores_lidos2[0])
+    except:
+        await ctx.channel.send(
+            embed=discord.Embed(
+                title=f'<:error:788824695184424980> **Você não possui uma conta no fênix!!**',
+                color=0xFF0000))
+        ctx.command.reset_cooldown(ctx)
+        return
+
+
+    global dindon
+    dindon = dindin
+
+    if valores_lidos2[0] < dindin:
+        await ctx.channel.send(f'<:error:788824695184424980>| Você {ctx.author.mention}, não possui **fenicoins** suficiente para a aposta!')
+        return
+
+    try:
+        try:
+            sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
+
+            cursor.execute(sqlinsert2)
+
+            valores_lidos3 = cursor.fetchone()
+            print(valores_lidos3[0])
+        except:
+            await ctx.channel.send(
+                embed=discord.Embed(
+                    title=f'<:error:788824695184424980> **O(a) `{member.name}` não possui uma conta no fênix!!**',
+                    color=0xFF0000))
+            ctx.command.reset_cooldown(ctx)
+            return
+
+        if valores_lidos3[0] < dindin:
+            await ctx.channel.send(f'<:error:788824695184424980>| O(a) {member.mention} não possui **fenicoins** suficiente para a aposta!')
+            return
+    except:
+        pass
+
+    if member:
+        global a
+        a = await ctx.channel.send(f'Ei {member.mention}, parece que o(a) {ctx.author.mention} quer fazer uma aposta com você! Onde cada um cada um vai pagar **{dindin - (dindin * 0.05)} fenicoin ( Vou cobrar uma taxa de {0.05 * dindin:.0f} fenicoin xD )**\n\n🤝| Para aceitar a aposta, você {member.mention} deve clicar na reação ✅')
+        await a.add_reaction('✅')
+        bot.reactions_member[str(a.id)] = member
+        bot.reactions_autor[str(a.id)] = ctx.author
+
+        await asyncio.sleep(100)
+
+        bot.reactions_member.pop(str(a.id))
+        bot.reactions_autor.pop(str(a.id))
+
+
+
+
+@apostar.error
+async def apostar_error(ctx, error):
+    if isinstance(error, commands.MemberNotFound):
+        return await ctx.channel.send(
+            f'<:error:788824695184424980> Desculpe {ctx.author.mention}, Procurei o membro `{error.argument}` por todo canto mas acabei não o encontrando')
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def add_suporte(ctx, member: discord.Member = None):
+    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+        pessoa = member.id
+        sqlinsert2 = f'SELECT permmissão FROM admin WHERE id = {pessoa}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos2 = cursor.fetchone()
+        try:
+            print(valores_lidos2[0])
+            await ctx.channel.send('<:error:788824695184424980> **Esse usuário já faz parte da equipe de suporte**')
+            return
+        except:
+
+            inserir = 'INSERT INTO admin (id, permmissão) VALUES (%s, %s)'
+            dados = (pessoa, 'sim')
+            cursor.execute(inserir, dados)
+            mydb.commit()
+            await ctx.channel.send(':white_check_mark: **Adicionado na suporte com sucesso!**')
+
+            embed1 = discord.Embed(title='Parabéns',
+                                description='Agora você faz parte do suporte do fênix!!',
+                                color=0xFFFF00)
+            embed1.set_thumbnail(url='https://media.discordapp.net/attachments/778295088753016903/787245337295060992/1607735746221.png')
+            embed1.set_footer(text=f'Recrutado em:{x.day}/{x.month}/{x.year} ')
+            await member.send(embed=embed1)
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não possui permissão para dar esse comando!**')
+
+
+
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def remove_suporte(ctx, member: discord.Member = None):
+    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+        pessoa = member.id
+        inserir = f'DELETE FROM admin WHERE id = {pessoa}'
+        cursor.execute(inserir)
+        mydb.commit()
+        await ctx.channel.send(':white_check_mark: **Removido na suporte com sucesso!**')
+
+        embed1 = discord.Embed(title='Que triste',
+                              description='Você não faz mais parte do suporte do fênix.',
+                              color=0xFFFF00)
+        embed1.set_thumbnail(url='https://media.discordapp.net/attachments/778295088753016903/787245337295060992/1607735746221.png')
+        embed1.set_footer(text=f'Removido em:{x.day}/{x.month}/{x.year} ')
+        await member.send(embed=embed1)
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não possui permissão para dar esse comando!**')
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def identificar(ctx, member: discord.Member = None):
+    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+    try:
+      if valores_lidos3[0] == 'sim':
+        sqlinsert2 = f'SELECT permmissão FROM admin WHERE id = {member.id}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos2 = cursor.fetchone()
+
+        try:
+            if valores_lidos2[0] == 'sim':
+                await ctx.channel.send(f':white_check_mark: **{member} faz parte da equipe de suporte**')
+
+        except:
+            await ctx.channel.send('<:error:788824695184424980> **Esse membro não faz parte da equipe suporte **')
+    except:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def clean_fenix(ctx, amount=10):
+    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+    try:
+        if valores_lidos3[0] == 'sim':
+            def is_me(m):
+                return m.author == bot.user
+
+            deleted = await ctx.channel.purge(limit=amount + 1, check=is_me)
+            await ctx.channel.send(':white_check_mark: **deletado {} mensagens do fênix nesse canal**'.format(amount))
+        else:
+            await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para dar esse comando**')
+    except:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+@commands.cooldown(1, 20, commands.BucketType.user)
+async def ajuda_suporte(ctx):
+    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+    try:
+      if valores_lidos3[0] == 'sim':
+        embed = discord.Embed(
+            title='**<a:Top:815388123039006741>Painel Suporte Fênix<a:Top:815388123039006741>**',
+            color=color,
+            description='***Comandos da equipe suporte:***\n\n`identificar (@user)` : identificar quem é da equipe de suporte\n`add_fenicoins` : Adicionar fenicoin em alguém\n`remove_fenicoins` : Remover fenicoin de alguém\n`set_fenicoins` : Setar fenicoins em alguèm\n`clean_fenix (valor)` : Limpa mensagens do fênix em um canal\n`add_suporte (@user)` : adicionar alguém na suporte\n`remove_suporte` : remover alguém da equipe de suporte\n`ban_fenix (id/user) (motivo)`\n`unban_fenix (id/user)`')
+        embed.set_thumbnail(url='https://media.discordapp.net/attachments/787270440283406399/787289422164131870/1607735746221.png')
+
+        await ctx.channel.send(ctx.author.mention, embed=embed)
+        await ctx.message.delete()
+    except:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def add_fenicoins(ctx, member: discord.Member, valor: int):
+    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos2 = cursor.fetchone()
+
+        try:
+            print(valores_lidos2[0])
+        except:
+            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
+                                                       color=0xFF0000))
+            return
+
+        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] + valor}' WHERE id = {member.id}"
+
+        cursor.execute(sqlinsert)
+
+        mydb.commit()
+        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Adicionado {valor} *fenicoins* para o(a) {member}',
+                                                   color=0x00FF00))
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+@bot.command()
+@commands.guild_only()
+async def remove_fenicoins(ctx, member: discord.Member, valor: int):
+    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos2 = cursor.fetchone()
+
+        try:
+            print(valores_lidos2[0])
+        except:
+            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
+                                                       color=0xFF0000))
+            return
+
+        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - valor}' WHERE id = {member.id}"
+
+        cursor.execute(sqlinsert)
+
+        mydb.commit()
+        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Removido {valor} *fenicoins* do(a) {member}',
+                                                   color=0xFF0000))
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+@bot.command()
+@commands.guild_only()
+@commands.check(check_ban)
+async def set_fenicoins(ctx, member: discord.Member, valor: int):
+    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+
+        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
+
+        cursor.execute(sqlinsert2)
+
+        valores_lidos2 = cursor.fetchone()
+
+        try:
+            print(valores_lidos2[0])
+        except:
+            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
+                                                       color=0xFF0000))
+            return
+
+        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valor}' WHERE id = {member.id}"
+
+        cursor.execute(sqlinsert)
+
+        mydb.commit()
+        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Setado {valor} *fenicoins* no(a) {member}',
+                                                   color=0x00FF00))
+    else:
+        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+
+
+@bot.command()
+@commands.check(check_ban)
+async def ban_fenix(ctx, member, *, motivo: str = 'Motivo não especificado!'):
+
+    if member == 567757366506815488:
+        return
+
+    member = await bot.fetch_user(int(member))
+
+    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+    if valores_lidos3[0] == 'sim':
+        inserir = 'INSERT INTO ban (idban, motivo) VALUES (%s, %s)'
+        dados = (int(member.id), motivo)
+        try:
+            cursor.execute(inserir, dados)
+            mydb.commit()
+
+            await ctx.send("***Usuário banido com sucesso!*** \n"
+                           f"**motivo:** {motivo}\n"
+                           f"**Tempo:** Permanente!")
+        except:
+            return await ctx.send("**Este usuário já está banido!**")
+
+        embed1 = discord.Embed(title=f':no_entry_sign:Você foi banido do fênix',
+                               description=f'**:police_officer:Banido por:**\n{ctx.author}\n:pencil:**Motivo:**\n{motivo}',
+                               color=0xFF0000,
+                               timestamp=datetime.datetime.utcnow())
+        embed1.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
+
+
+        await member.send(embed=embed1)
+
+    else:
+        return
+
+@bot.command()
+@commands.check(check_ban)
+async def unban_fenix(ctx, member: int):
+    if member == 567757366506815488:
+        return
+
+    member = await bot.fetch_user(int(member))
+
+    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+
+    cursor.execute(sqlinsert3)
+
+    valores_lidos3 = cursor.fetchone()
+    if valores_lidos3[0] == 'sim':
+        inserir = f'DELETE FROM ban WHERE idban = {member.id}'
+        cursor.execute(inserir)
+        mydb.commit()
+
+        embed1 = discord.Embed(title=f':no_entry_sign:Você foi Desbanido do fênix',
+                               description=f'**:police_officer:Desbanido por:**\n{ctx.author}',
+                               color=0xFF0000,
+                               timestamp=datetime.datetime.utcnow())
+        embed1.set_thumbnail(
+            url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
+
+
+        await ctx.send('Desbanido!')
+        await member.send(embed=embed1)
+
+
+#----------------------------------------------------------------------------------------------------------------
+
+@bot.event
+@commands.check(check_ban)
+async def on_reaction_add(reaction, user):
+        cursor.execute("ROLLBACK")
+        mydb.commit()
+
+        wellcomeUser = bot.reactionsm.get(str(reaction.message.id))
+        member1 = bot.reactions_member.get(str(reaction.message.id))
+        autor1 = bot.reactions_autor.get(str(reaction.message.id))
+        autor = bot.reactions.get(str(reaction.message.id))
+        react = str(reaction)
+
+
+
+        sqlinsert3 = f'SELECT mensagem FROM welcome WHERE idserv = {reaction.message.guild.id}'
+
+        cursor.execute(sqlinsert3)
+
+        valores_lidos3 = cursor.fetchone()
+
+
+
+
+        # COMANDO DE AJUDA:
+
+        if autor == user and react == '<a:emoji_42:815378184219918336>':
+            embed = discord.Embed(
+                title='<a:feliz:815313006937899009> Comandos Principais <a:feliz:815313006937899009>',
+                description=''
+                ,
+
+                color=0x00BFFF)
+            embed.add_field(name='ㅤ\n<a:Upd:815312986528677899> Avaliar O Fênix', value='`f!avaliar`\nㅤ', inline=False)
+            embed.add_field(name='<a:Upd:815312986528677899> Convidar O Fênix', value='`f!invite`\nㅤ', inline=False)
+            embed.add_field(name=':frame_photo: Ver Avatar', value='`f!avatar <@user>`\nㅤ', inline=False)
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+            await reaction.message.edit(embed=embed)
+            await reaction.remove(user)
+        if autor == user and react == '<a:emoji_44:815378316617580575>':
+            embed = discord.Embed(
+                title='Comandos De Diversão',
+                color=0x00BFFF,
+                description=f'\n\n**meu prefixo é** `f!`\n\n'
+
+            )
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+
+            embed.add_field(name='ㅤ\n<:moeda:815324002649767986> Girar Moeda', value='`f!coinflip`\nㅤ', inline=False)
+            embed.add_field(name=':crossed_swords: Desafiar Fênix', value='`f!desafiar fênix`\nㅤ', inline=False)
+
+            await reaction.message.edit(embed=embed)
+            await reaction.remove(user)
+
+        if autor == user and react == '<a:emoji_43:815378237563207680>':
+            embed = discord.Embed(
+                title=':moneybag: Bem Vindo ao painel de economia!!',
+                description='***Comandos de economia***\n'
+
+                ,
+                color=0x00BFFF)
+            embed.add_field(name='ㅤ\n<a:Upd:815312986528677899> Criar Sua Conta', value='`f!criar_conta`\nㅤ',
+                            inline=False)
+            embed.add_field(name=':bank:  Olhar Conta', value='`f!conta` ou `f!conta <@user>`\nㅤ', inline=False)
+            embed.add_field(name='<a:giveway:815050719803211786> Pegar Sua Diária', value='`f!diária`\nㅤ', inline=False)
+            embed.add_field(name='<a:transferir:815378076250800139> Transferir Fenicoins',
+                            value='`f!transferir <@user> <valor>`\nㅤ', inline=False)
+            embed.add_field(name=':scroll: Editar Descrição', value='`f!desc_edit`\nㅤ', inline=False)
+            embed.add_field(name=':art: Cor Da Conta', value='`f!desc_edit`\nㅤ', inline=False)
+            embed.add_field(name='<a:gun_1:815387129999130636> Roubar Alguém', value='`f!roubar <@user>`\nㅤ',
+                            inline=False)
+            embed.add_field(name='<a:gun_1:815387129999130636> Armamento', value='`f!roubar <@user>`\nㅤ', inline=False)
+            embed.add_field(name='<:moeda:815324002649767986> Ver Fenicoins', value='`f!coin` ou `f!coin <@user>`\nㅤ',
+                            inline=False)
+            embed.add_field(name='<a:Top:815388123039006741> Ver Os Ricos', value='`f!top_global`\nㅤ', inline=False)
+            embed.add_field(name='<a:gun_1:815387129999130636> Roubar Banco',
+                            value='`f!roubar_banco` ou `f!roubar_banco <@user>`\nㅤ', inline=False)
+            embed.add_field(name='<:moeda:815324002649767986> Apostar Fenicoins', value='`f!apostar <@user>`\nㅤ',
+                            inline=False)
+
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+
+            await reaction.message.edit(embed=embed)
+            await reaction.remove(user)
+
+        if autor == user and react == '<a:emoji_45:815378376528887859>':
+            embed = discord.Embed(
+                title='<:reforma:774259152829677589> Comandos para Moderadores <:reforma:774259152829677589>',
+                description=''
+                ,
+
+                color=0x00BFFF)
+            embed.add_field(name='ㅤ\n<a:ban:815316725402566666> Banimento', value='`f!ban <@user> <motivo>`',
+                            inline=False)
+            embed.add_field(name='<a:ban:815316725402566666> Unbanimento', value='`f!unban <user_id>`\nㅤ', inline=False)
+
+            embed.add_field(name='<a:muted:815317083427569665> Mutar', value='`f!mute <@user>`', inline=False)
+            embed.add_field(name='<a:muted:815317083427569665> Desmutar', value='`f!unmute <@user>`\nㅤ', inline=False)
+
+            embed.add_field(name=':octagonal_sign: Desafiar (lock/unlock)', value='`f!desafiar (lock/unlock)`',
+                            inline=False)
+            embed.add_field(name=':book: Embed', value='`f!embed`', inline=False)
+            embed.add_field(name='<a:lixo:818920412233859083> Limpar Chat', value='`f!limpar <quantidade>`', inline=False)
+            embed.add_field(name='<:emoji_12:778982435920150538> Mensagem De Bem Vindo', value='`f!welcome` ou `f!bemvindo`\nㅤ', inline=False)
+            embed.add_field(name='<a:warn:818918476915540020> Penalizar Alguém (warn)', value='`f!warn <@user> <motivo>`',
+                            inline=False)
+            embed.add_field(name='<a:warn:818918476915540020> Despenalizar Alguém (warn_remove)', value='`f!warn_remove <@user>`', inline=False)
+            embed.add_field(name='<a:warn:818918476915540020> Ver Penalidade (warn)', value='`f!warn_checks <@user>` ou `f!checks_warn <@user>`\nㅤ', inline=False)
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+
+            await reaction.message.edit(embed=embed)
+            await reaction.remove(user)
+
+        if autor == user and react == '<a:seta:796356802760933387>':
+            embed = discord.Embed(
+                title='*** Olá, meu nome é Fênix 🐦***',
+                description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
+                            '\n'
+                            '\n'
+                            '**👮 Servidor Para Suporte**\n'
+                            '[Clique aqui](https://discord.gg/VDTAt3Qb9X) para entrar no servidor de suporte!\n'
+                            '\n'
+                            '\n'
+                            '<a:emoji_42:815378184219918336> **: Comandos Principais**\n'
+                            '\n'
+                            '<a:emoji_44:815378316617580575> **: Comandos De Diversão**\n'
+                            '\n'
+                            '<a:emoji_43:815378237563207680> **: Comandos De Economia**\n'
+                            '\n'
+                            '<a:emoji_45:815378376528887859> **: Comandos Para Moderadores**\n'
+                            '\n'
+                            '<a:seta:796356802760933387> **: Pagina Inicial**\n ㅤㅤ',
+                color=0x00BFFF)
+
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+
+            await reaction.message.edit(embed=embed)
+
+            await reaction.remove(user)
+
+                # COINFLIP BET:
+
+        if member1 == user and react == '✅':
+
+            sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {autor1.id}'
+
+            cursor.execute(sqlinsert2)
+
+            valores_lidos2 = cursor.fetchone()
+
+            sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member1.id}'
+
+            cursor.execute(sqlinsert2)
+
+            valores_lidos3 = cursor.fetchone()
+
+            randon = random.randint(1, 2)
+
+            # se o autor ganhar:
+            if randon == 1:
+                await reaction.message.delete()
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - (dindon * 0.05 - dindon):.0f}' WHERE id = {autor1.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos3[0] + (dindon * 0.05 - dindon):.0f}' WHERE id = {member1.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                await reaction.message.channel.send(
+                    f'Opa!! Parabéns {autor1.mention}, você ganhou a aposta de **{dindon - (dindon * 0.05):.0f} fenicoins** do(a) {member1.mention}')
+                bot.reactions_member.pop(str(a.id))
+                bot.reactions_autor.pop(str(a.id))
+            # se o membro ganhar
+
+            if randon == 2:
+                await reaction.message.delete()
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] + (dindon * 0.05 - dindon):.0f}' WHERE id = {autor1.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos3[0] - (dindon * 0.05 - dindon):.0f}' WHERE id = {member1.id}"
+
+                cursor.execute(sqlinsert)
+
+                mydb.commit()
+
+                await reaction.message.channel.send(
+                    f'Opa!! Parabéns {member1.mention}, você ganhou a aposta de **{dindon - (dindon * 0.05):.0f} fenicoins** do(a) {autor1.mention}')
+                bot.reactions_member.pop(str(a.id))
+                bot.reactions_autor.pop(str(a.id))
+
+
+
+        if wellcomeUser == user and react == '<a:number_1:815207357751361536>' or wellcomeUser == user and react == '<a:verificao_1:815313840354361384>':
+
+            embed = discord.Embed(
+                title='<a:number_1:815207357751361536>   Primeira Mensagem',
+                description='**<a:verificao_1:815313840354361384> Definir Mensagem!**\n'
+                            '\n'
+                            '**<a:seta:796356802760933387> Cancelar**',
+
+                color=0x00BFFF)
+            embed.set_image(
+                url='https://media.discordapp.net/attachments/788064370722340885/816084509966729286/Screenshot_20210301-200702.png')
+            await reaction.message.remove_reaction('<a:number_1:815207357751361536>', bot.user)
+            await reaction.message.remove_reaction('<a:number_1:815207357751361536>', user)
+            await reaction.message.remove_reaction('<a:number_2:815207379988905994>', bot.user)
+            await reaction.message.remove_reaction('<a:number_3:815207399686144030>', bot.user)
+            await reaction.message.remove_reaction('<a:number_4:815207421316300840>', bot.user)
+            await reaction.message.remove_reaction('<:error:788824695184424980>', bot.user)
+
+            message = await reaction.message.edit(embed=embed)
+
+            await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+            await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+            if react == '<a:verificao_1:815313840354361384>':
+                await reaction.message.remove_reaction('<a:verificao_1:815313840354361384>', bot.user)
+                await reaction.message.remove_reaction('<a:verificao_1:815313840354361384>', user)
+                await reaction.message.remove_reaction('<a:seta:796356802760933387>', bot.user)
+
+                msg1 = await reaction.message.channel.send(
+                    '<a:verificao_1:815313840354361384> Escreva o **Id do chat** onde vai ser enviado a mensagem:')
+
+                def check(p):
+                    return p.author == user and p.channel == reaction.message.channel
+
+                try:
+                    til = await bot.wait_for('message', timeout=1000, check=check)
+                except asyncio.TimeoutError:
+                    return await reaction.message.channel.send('**Acabou O Tempo Para Aceitar**')
+                else:
+
+                    try:
+                        idchannel = int(til.content)
+
+                    except:
+                        await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        error = await reaction.message.channel.send(
+                            '<:error:788824695184424980>| isso não é um ID válido')
+                        await asyncio.sleep(10)
+                        return await error.delete()
+                try:
+                    channel = bot.get_channel(id=idchannel)
+                    msg2 = await reaction.message.channel.send('<a:loading:785523240944664646> Verificando o ID')
+                    await asyncio.sleep(10)
+                    if channel.guild.id != reaction.message.guild.id:
+                        await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        return await msg2.edit(
+                            content='<:error:788824695184424980>| Esse chat **não faz parte** desse servidor!')
+                    teste = await channel.send('<a:loading:785523240944664646>')
+                    await teste.delete()
+                except:
+                    await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    await til.delete()
+                    await msg1.delete()
+                    return await msg2.edit(
+                        content='<:error:788824695184424980>| **Não encontrei** nenhum chat com esse *ID* ')
+                try:
+                    inserir = 'INSERT INTO welcome (idserv, mensagem, channel) VALUES (%s, %s, %s)'
+                    dados = (reaction.message.guild.id, 1, idchannel)
+                    cursor.execute(inserir, dados)
+                    mydb.commit()
+                except:
+                    await msg1.delete()
+                    await til.delete()
+                    await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    return await msg2.edit(content=
+                                           f'<:error:788824695184424980>| Olá {user.mention} parece que esse servidor **já possui** mensagem de *bem vindo!*')
+                await msg1.delete()
+                await msg2.edit(
+                    content=f'<a:Upd:815312986528677899> Mensagem de *Bem Vindo* Ativada no chat `{channel.name}` com **Sucesso!!**')
+                await til.delete()
+                await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+                # NUMBER_2
+
+
+
+
+
+
+        elif wellcomeUser == user and react == '<a:number_2:815207379988905994>' or wellcomeUser == user and react == '<a:verificao_2:815561265463164978>':
+            embed = discord.Embed(
+                title='<a:number_2:815207379988905994>   Segunda Mensagem',
+                description='**<a:verificao_2:815561265463164978> Definir Mensagem!**\n'
+                            '\n'
+                            '**<a:seta:796356802760933387> Cancelar**',
+
+                color=0x00BFFF)
+            embed.set_image(
+                url='https://media.discordapp.net/attachments/788064370722340885/816106100256276501/Screenshot_20210301-213253.png')
+            await reaction.message.remove_reaction('<a:number_1:815207357751361536>', bot.user)
+            await reaction.message.remove_reaction('<a:number_2:815207379988905994>', user)
+            await reaction.message.remove_reaction('<a:number_2:815207379988905994>', bot.user)
+            await reaction.message.remove_reaction('<a:number_3:815207399686144030>', bot.user)
+            await reaction.message.remove_reaction('<a:number_4:815207421316300840>', bot.user)
+            await reaction.message.remove_reaction('<:error:788824695184424980>', bot.user)
+
+            message = await reaction.message.edit(embed=embed)
+
+            await reaction.message.add_reaction('<a:verificao_2:815561265463164978>')
+            await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+            if react == '<a:verificao_2:815561265463164978>':
+                await reaction.message.remove_reaction('<a:verificao_2:815561265463164978>', bot.user)
+                await reaction.message.remove_reaction('<a:verificao_2:815561265463164978>', user)
+                await reaction.message.remove_reaction('<a:seta:796356802760933387>', bot.user)
+
+                msg1 = await reaction.message.channel.send(
+                    '<a:verificao_1:815313840354361384> Escreva o **Id do chat** onde vai ser enviado a mensagem:')
+
+                def check(p):
+                    return p.author == user and p.channel == reaction.message.channel
+
+                try:
+                    til = await bot.wait_for('message', timeout=1000, check=check)
+                except asyncio.TimeoutError:
+                    return await reaction.message.channel.send(
+                        '<:error:788824695184424980>| **Acabou O Tempo Para Responder**')
+                else:
+
+                    try:
+                        idchannel = int(til.content)
+
+                    except:
+                        await reaction.message.add_reaction('<a:verificao_2:815561265463164978>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        error = await reaction.message.channel.send(
+                            '<:error:788824695184424980>| isso não é um ID válido')
+                        await til.delete()
+                        await msg1.delete()
+                        await asyncio.sleep(10)
+                        return await error.delete()
+                try:
+                    channel = bot.get_channel(id=idchannel)
+                    msg2 = await reaction.message.channel.send('<a:loading:785523240944664646> Verificando o ID')
+                    await asyncio.sleep(10)
+
+                    if channel.guild.id != reaction.message.guild.id:
+                        await reaction.message.add_reaction('<a:verificao_1:815313840354361384>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        return await msg2.edit(
+                            content='<:error:788824695184424980>| Esse chat **não faz parte** desse servidor!')
+                    teste = await channel.send('<a:loading:785523240944664646>')
+                    await teste.delete()
+                except:
+                    await reaction.message.add_reaction('<a:verificao_2:815561265463164978>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    await til.delete()
+                    await msg1.delete()
+                    return await msg2.edit(
+                        content='<:error:788824695184424980>| **Não encontrei** nenhum chat com esse *ID* ')
+
+                try:
+                    inserir = 'INSERT INTO welcome (idserv, mensagem, channel) VALUES (%s, %s, %s)'
+                    dados = (reaction.message.guild.id, 2, idchannel)
+                    cursor.execute(inserir, dados)
+                    mydb.commit()
+                except:
+                    await msg1.delete()
+                    await reaction.message.add_reaction('<a:verificao_2:815561265463164978>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    return await msg2.edit(
+                        content=f'<:error:788824695184424980>| Olá {user.mention} parece que esse servidor **já possui** mensagem de *bem vindo!*')
+                await msg1.delete()
+                await msg2.edit(
+                    content=f'<a:Upd:815312986528677899> Mensagem de *Bem Vindo* Ativada no chat `{channel.name}` com **Sucesso!!**')
+                await til.delete()
+                await msg1.delete()
+                await reaction.message.add_reaction('<a:verificao_2:815561265463164978>')
+                await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+                # NUMBER 3
+
+
+
+
+
+
+
+        elif wellcomeUser == user and react == '<a:number_3:815207399686144030>' or wellcomeUser == user and react == '<a:verificao_3:815561286522765345>':
+            embed = discord.Embed(
+                title='<a:number_3:815207399686144030>   Terceira Mensagem',
+                description='**<a:verificao_3:815561286522765345> Definir Mensagem!**\n'
+                            '\n'
+                            '**<a:seta:796356802760933387> Cancelar**',
+
+                color=0x00BFFF)
+            embed.set_image(
+                url='https://media.discordapp.net/attachments/788064370722340885/816112025959923752/Screenshot_20210301-215627.png')
+            await reaction.message.remove_reaction('<a:number_1:815207357751361536>', bot.user)
+            await reaction.message.remove_reaction('<a:number_3:815207399686144030>', user)
+            await reaction.message.remove_reaction('<a:number_2:815207379988905994>', bot.user)
+            await reaction.message.remove_reaction('<a:number_3:815207399686144030>', bot.user)
+            await reaction.message.remove_reaction('<a:number_4:815207421316300840>', bot.user)
+            await reaction.message.remove_reaction('<:error:788824695184424980>', bot.user)
+
+            message = await reaction.message.edit(embed=embed)
+
+            await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+            await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+            if react == '<a:verificao_3:815561286522765345>':
+                await reaction.message.remove_reaction('<a:verificao_3:815561286522765345>', bot.user)
+                await reaction.message.remove_reaction('<a:verificao_3:815561286522765345>', user)
+                await reaction.message.remove_reaction('<a:seta:796356802760933387>', bot.user)
+
+                msg1 = await reaction.message.channel.send(
+                    '<a:verificao_3:815561286522765345> Escreva o **Id do chat** onde vai ser enviado a mensagem:')
+
+                def check(p):
+                    return p.author == user and p.channel == reaction.message.channel
+
+                try:
+                    til = await bot.wait_for('message', timeout=1000, check=check)
+                except asyncio.TimeoutError:
+                    return await reaction.message.channel.send(
+                        '<:error:788824695184424980>| **Acabou O Tempo Para Responder**')
+                else:
+
+                    try:
+                        idchannel = int(til.content)
+
+                    except:
+                        await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        error = await reaction.message.channel.send(
+                            '<:error:788824695184424980>| isso não é um ID válido')
+                        await til.delete()
+                        await msg1.delete()
+                        await asyncio.sleep(10)
+                        return await error.delete()
+                try:
+                    channel = bot.get_channel(id=idchannel)
+                    msg2 = await reaction.message.channel.send('<a:loading:785523240944664646> Verificando o ID')
+                    await asyncio.sleep(10)
+
+                    if channel.guild.id != reaction.message.guild.id:
+                        await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        return await msg2.edit(
+                            content='<:error:788824695184424980>| Esse chat **não faz parte** desse servidor!')
+                    teste = await channel.send('<a:loading:785523240944664646>')
+                    await teste.delete()
+                except:
+                    await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    await til.delete()
+                    await msg1.delete()
+                    return await msg2.edit(
+                        content='<:error:788824695184424980>| **Não encontrei** nenhum chat com esse *ID* ')
+
+                try:
+                    inserir = 'INSERT INTO welcome (idserv, mensagem, channel) VALUES (%s, %s, %s)'
+                    dados = (reaction.message.guild.id, 3, idchannel)
+                    cursor.execute(inserir, dados)
+                    mydb.commit()
+                except:
+                    await msg1.delete()
+                    await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    return await msg2.edit(
+                        content=f'<:error:788824695184424980>| Olá {user.mention} parece que esse servidor **já possui** mensagem de *bem vindo!*')
+                await msg1.delete()
+                await msg2.edit(
+                    content=f'<a:Upd:815312986528677899> Mensagem de *Bem Vindo* Ativada no chat `{channel.name}` com **Sucesso!!**')
+                await til.delete()
+
+                await reaction.message.add_reaction('<a:verificao_3:815561286522765345>')
+                await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+                # MENSAGEM 4
+
+
+
+
+        elif wellcomeUser == user and react == '<a:number_4:815207421316300840>' or wellcomeUser == user and react == '<a:verificao_4:815561308577464321>':
+            embed = discord.Embed(
+                title='<a:number_4:815207421316300840>   Terceira Mensagem',
+                description='**<a:verificao_4:815561308577464321> Definir Mensagem!**\n'
+                            '\n'
+                            '**<a:seta:796356802760933387> Cancelar**',
+
+                color=0x00BFFF)
+            embed.set_image(
+                url='https://media.discordapp.net/attachments/788064370722340885/816114550457106482/Screenshot_20210301-220616.png')
+            await reaction.message.remove_reaction('<a:number_1:815207357751361536>', bot.user)
+            await reaction.message.remove_reaction('<a:number_4:815207421316300840>', user)
+            await reaction.message.remove_reaction('<a:number_2:815207379988905994>', bot.user)
+            await reaction.message.remove_reaction('<a:number_3:815207399686144030>', bot.user)
+            await reaction.message.remove_reaction('<a:number_4:815207421316300840>', bot.user)
+            await reaction.message.remove_reaction('<:error:788824695184424980>', bot.user)
+
+            message = await reaction.message.edit(embed=embed)
+
+            await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+            await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+            if react == '<a:verificao_4:815561308577464321>':
+                await reaction.message.remove_reaction('<a:verificao_4:815561308577464321>', bot.user)
+                await reaction.message.remove_reaction('<a:verificao_4:815561308577464321>', user)
+                await reaction.message.remove_reaction('<a:seta:796356802760933387>', bot.user)
+
+                msg1 = await reaction.message.channel.send(
+                    '<a:verificao_4:815561308577464321> Escreva o **Id do chat** onde vai ser enviado a mensagem:')
+
+                def check(p):
+                    return p.author == user and p.channel == reaction.message.channel
+
+                try:
+                    til = await bot.wait_for('message', timeout=1000, check=check)
+                except asyncio.TimeoutError:
+                    return await reaction.message.channel.send(
+                        '<:error:788824695184424980>| **Acabou O Tempo Para Responder**')
+                else:
+
+                    try:
+                        idchannel = int(til.content)
+
+                    except:
+                        await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        error = await reaction.message.channel.send(
+                            '<:error:788824695184424980>| isso não é um ID válido')
+                        await til.delete()
+                        await msg1.delete()
+                        await asyncio.sleep(10)
+                        return await error.delete()
+                try:
+                    channel = bot.get_channel(id=idchannel)
+                    msg2 = await reaction.message.channel.send('<a:loading:785523240944664646> Verificando o ID')
+                    await asyncio.sleep(10)
+
+                    if channel.guild.id != reaction.message.guild.id:
+                        await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+                        await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                        return await msg2.edit(
+                            content='<:error:788824695184424980>| Esse chat **não faz parte** desse servidor!')
+                    teste = await channel.send('<a:loading:785523240944664646>')
+                    await teste.delete()
+                except:
+                    await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    await til.delete()
+                    await msg1.delete()
+                    return await msg2.edit(
+                        content='<:error:788824695184424980>| **Não encontrei** nenhum chat com esse *ID* ')
+
+                try:
+                    inserir = 'INSERT INTO welcome (idserv, mensagem, channel) VALUES (%s, %s, %s)'
+                    dados = (reaction.message.guild.id, 4, idchannel)
+                    cursor.execute(inserir, dados)
+                    mydb.commit()
+                except:
+                    await msg1.delete()
+                    await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+                    await reaction.message.add_reaction('<a:seta:796356802760933387>')
+                    return await msg2.edit(
+                        content=f'<:error:788824695184424980>| Olá {user.mention} parece que esse servidor **já possui** mensagem de *bem vindo!*')
+                await msg1.delete()
+                await msg2.edit(
+                    content=f'<a:Upd:815312986528677899> Mensagem de *Bem Vindo* Ativada no chat `{channel.name}` com **Sucesso!!**')
+                await til.delete()
+
+                await reaction.message.add_reaction('<a:verificao_4:815561308577464321>')
+                await reaction.message.add_reaction('<a:seta:796356802760933387>')
+
+
+
+
+
+
+
+
+
+
+
+        elif wellcomeUser == user and react == '<:error:788824695184424980>':
+            try:
+                if valores_lidos3 == None:
+                    msg2 = await reaction.message.channel.send(
+                        f'<:error:788824695184424980>| Esse servidor **Não Possui** mensagem de *Boas Vindas* do Fênix!')
+                    await reaction.remove(user)
+                    await asyncio.sleep(10)
+                    await msg2.delete()
+                    return
+
+                inserir = f'DELETE FROM welcome WHERE idserv = {reaction.message.guild.id}'
+                cursor.execute(inserir)
+                mydb.commit()
+                msg1 = await reaction.message.channel.send(
+                    f'<a:Upd:815312986528677899> Mensagem de *Bem Vindo* **Removida!**')
+                await reaction.remove(user)
+                await asyncio.sleep(10)
+                await msg1.delete()
+            except:
+                msg2 = await reaction.message.channel.send(
+                    f'<:error:788824695184424980>| Esse servidor **Não Possui** mensagem de *Boas Vindas* do Fênix!')
+                await asyncio.sleep(10)
+                await msg2.delete()
+
+        elif wellcomeUser == user and react == '<a:seta:796356802760933387>':
+            embed = discord.Embed(
+                title='*** Olá, meu nome é Fênix 🐦***',
+                description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
+                            '\n'
+                            '\n'
+                            '**<a:feliz:815313006937899009> Mensagens De Bem Vindo **\n'
+                            '\n'
+                            '\n'
+                            '\n'
+                            '<a:number_1:815207357751361536> **: Primeira Mensagem**\n'
+                            '\n'
+                            '<a:number_2:815207379988905994> **: Segunda Mensagem**\n'
+                            '\n'
+                            '<a:number_3:815207399686144030> **: Terceira Mensagem**\n'
+                            '\n'
+                            '<a:number_4:815207421316300840> **: Quarta mensagem**\n'
+                            '\n'
+                            '<:error:788824695184424980> **: Apagar Configuração**\n ㅤㅤ',
+                color=0x00BFFF)
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
+
+            await reaction.message.edit(embed=embed)
+
+            await reaction.message.remove_reaction('<a:verificao_1:815313840354361384>', bot.user)
+            await reaction.message.remove_reaction('<a:verificao_2:815561265463164978>', bot.user)
+            await reaction.message.remove_reaction('<a:verificao_3:815561286522765345>', bot.user)
+            await reaction.message.remove_reaction('<a:verificao_4:815561308577464321>', bot.user)
+            await reaction.message.remove_reaction('<a:seta:796356802760933387>', user)
+            await reaction.message.remove_reaction('<a:seta:796356802760933387>', bot.user)
+
+            await reaction.message.add_reaction('<a:number_1:815207357751361536>')
+            await reaction.message.add_reaction('<a:number_2:815207379988905994>')
+            await reaction.message.add_reaction('<a:number_3:815207399686144030>')
+            await reaction.message.add_reaction('<a:number_4:815207421316300840>')
+            await reaction.message.add_reaction('<:error:788824695184424980>')
+
+
+
+
+
+
+
+
+
+
+
+        #------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+@bot.event
+async def on_guild_join(guild):
+    return await On_guild_join(guild)
+
+@bot.event
+async def on_guild_remove(guild):
+    return await On_guild_remove(guild)
+
+
+@bot.event
+async def on_member_join(member):
+    return await On_member_join(member)
+
+
+
+bot.run('Nzc2NjEzMjA5NDIzMjE2NjUw.X63baQ.w6TRoWGmiDtXBKYLEyRRtQKNt38')
