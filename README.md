@@ -9,3 +9,7 @@
 ## Lista de Tarefas 
 
  - [ ] Separar o Fênix em __Arquivos!__
+
+ - [ ] Otimizar o código.
+
+ - [ ] Melhorar as Embeds.
