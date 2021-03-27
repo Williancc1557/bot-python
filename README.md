@@ -1,5 +1,8 @@
-# primeiro repositório do Fênix!
- Lindo e Bonito
+# Repositório do Fênix
+---
+ Programado totalmente em python!! 
+ 
+ Banco de Dados **SQL**
 
 
  
