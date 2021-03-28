@@ -496,7 +496,7 @@ async def Limpar(ctx, amount: int = None):
             embed.add_field(name='📚 Como usar', value='`f!limpar <quantidade>`')
             embed.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/825745566591221790/lixin.gif')
 
-            return await ctx.channel.send(embed=embed)
+            return await ctx.reply(embed=embed)
 
         if amount + 1 > 101:
             return await ctx.channel.send('<:error:788824695184424980>| Não posso apagar mais que **100 mensagens**')
@@ -689,7 +689,7 @@ async def Warn_remove(ctx, member: discord.Member):
             title='<a:warn:818918476915540020> Comando para *Visualizar* Warn(s)!! <a:warn:818918476915540020>\n'
                   '\n'
                   '`f!warn_remove`\nㅤ',
-            description='Deseja **Remover** alguma penalização? Então utilize esse comando para a remoção da mesma  <:kaway:825740909177077851>  \n',
+            description='Deseja **Remover** alguma penalização? Então utilize esse comando para a remoção da mesma  <:kaway:825740909177077851>\nㅤ',
             color=0x9400D3)
         embed.add_field(name='📚 Como usar', value='`f!warn_remove <@WiLL>`')
         embed.set_thumbnail(
@@ -759,7 +759,7 @@ async def Check_warns(ctx, member: discord.Member = None):
                 title='<a:warn:818918476915540020> Comando para *Retirar* Warn(s)!! <a:warn:818918476915540020>\n'
                       '\n'
                       '`f!warn_check`\nㅤ',
-                description='Deseja ver a **Quantidade** de warn de alguém? Então utilize esse comando.  \n',
+                description='Deseja ver a **Quantidade** de warn de alguém? Então utilize esse comando.\nㅤ',
                 color=0x9400D3)
             embed.add_field(name='📚 Como usar', value='`f!warn_check <@WiLL>`')
             embed.set_thumbnail(
@@ -802,7 +802,7 @@ async def Mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=N
                     title='<a:muted:815317083427569665> Comando para *Mutar usuários*!! <a:muted:815317083427569665>\n'
                           '\n'
                           '`f!mute`\nㅤ',
-                    description='Deseja **Mutar** alguém? Então utilize esse comando.  \n',
+                    description='Deseja **Mutar** alguém? Então utilize esse comando.\nㅤ',
                     color=0x9400D3)
                 embed.add_field(name='📚 Como usar', value='`f!mute <@WiLL> <temp> <horas, minutos, segundos>`')
                 embed.set_thumbnail(
@@ -991,7 +991,7 @@ async def Unmute(ctx, member: discord.Member = None):
                 title='<a:muted:815317083427569665> Comando para *Desmutar usuários*!! <a:muted:815317083427569665>\n'
                       '\n'
                       '`f!unmute`\nㅤ',
-                description='Deseja **Desmutar** alguém? Então utilize esse comando.  \n',
+                description='Deseja **Desmutar** alguém? Então utilize esse comando.\nㅤ',
                 color=0x9400D3)
             embed.add_field(name='📚 Como usar', value='`f!unmute <@WiLL>`')
             embed.set_thumbnail(
@@ -1031,7 +1031,7 @@ async def Ban(ctx, member: discord.Member, *, reason='*Motivo não especificado*
                     title='<a:ban:815316725402566666> Comando para *Banir*!! <a:ban:815316725402566666>\n'
                           '\n'
                           '`f!ban`\nㅤ',
-                    description='Deseja **Banir** aquele membro chato? Então utilize esse comando.  \n',
+                    description='Deseja **Banir** aquele membro chato? Então utilize esse comando.\nㅤ',
                     color=0x9400D3)
                 embed.add_field(name='📚 Como usar', value='`f!ban <@WiLL> motivo`')
                 embed.set_thumbnail(
@@ -1097,7 +1097,7 @@ async def Unban(ctx, id: int):
             title='<a:ban:815316725402566666> Comando para *Desbanir*!! <a:ban:815316725402566666>\n'
                   '\n'
                   '`f!unban`\nㅤ',
-            description='Deseja **Desbanir** alguem? Então utilize esse comando.  \n',
+            description='Deseja **Desbanir** alguem? Então utilize esse comando.\nㅤ',
             color=0x9400D3)
         embed.add_field(name='📚 Como usar', value='`f!unban <user_id>`')
         embed.set_thumbnail(
