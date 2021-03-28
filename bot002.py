@@ -8,12 +8,12 @@ import psycopg2
 
 from time import sleep
 
-
+from adm.suporte import Add_suporte, Remove_suporte, Identificar, Clean_fenix, Ajuda_suporte, Add_fenicoins, Remove_fenicoins, Set_fenicoins, Ban_fenix, Unban_fenix
 from Principais.principais import Avaliar, bot, Avatar, Invite, mydb
 from moderacao.Moderacao import Mute, Ban, Unban, Unmute, Warn, Warn_remove, Check_warns, Limpar, Embed
 from events.events import On_ready, On_command_error, On_message, On_guild_remove, On_member_join, On_guild_join
 from Diversao.diversao import Desafiar, Coinflip
-from Economia.economia import Criar_conta, Conta, Desc_edit, Transferir, Diaria, Cor, Roubar, Arma, Fenicoins
+from Economia.economia import Criar_conta, Conta, Desc_edit, Transferir, Diaria, Cor, Roubar, Arma, Fenicoins, Top_global, Roubar_banco
 
 
 
@@ -611,45 +611,7 @@ async def fenicoins(ctx, member: discord.Member = None):
 @commands.guild_only()
 @commands.check(check_ban)
 async def top_global(ctx):
-    sqlinsert4 = f'select nome from dinheiro ORDER BY dinheiro desc'
-
-    cursor.execute(sqlinsert4)
-
-    valores_lidos4 = cursor.fetchall()
-
-    sqlinsert5 = f'select dinheiro from dinheiro ORDER BY dinheiro desc'
-
-    cursor.execute(sqlinsert5)
-
-    valores_lidos5 = cursor.fetchall()
-
-    for index, element in enumerate(valores_lidos5):
-        if index == 0:
-            num10 = element[0]
-        if index == 1:
-            num20 = element[0]
-        if index == 2:
-            num30 = element[0]
-            break
-
-    for index, element in enumerate(valores_lidos4):
-        if index == 0:
-            num1 = element[0]
-        if index == 1:
-            num2 = element[0]
-        if index == 2:
-            num3 = element[0]
-            break
-
-    embed = discord.Embed(title='<a:Top:815388123039006741>        Os Tops 3 no Ranking         <a:Top:815388123039006741>',
-                          description='',
-                          color=0x0000FF)
-    embed.set_thumbnail(
-        url='https://media.discordapp.net/attachments/788064370722340885/811621833484140555/edificio-de-banco-retro-dos-desenhos-animados-ou-tribunal-com-ilustracao-de-colunas-isolada-no-branc.png')
-    embed.add_field(name='<a:emoji_42:815378184219918336> no Ranking', value=f'{num1}\n**{num10}**', inline=True)
-    embed.add_field(name='<a:emoji_44:815378316617580575> no Ranking', value=f'{num2}\n**{num20}**', inline=True)
-    embed.add_field(name='<a:emoji_43:815378237563207680> no Ranking', value=f'{num3}\n**{num30}**', inline=True)
-    await ctx.reply(ctx.author.mention, embed=embed)
+    await Top_global(ctx)
 
 
 
@@ -661,467 +623,8 @@ async def top_global(ctx):
 @commands.check(check_ban)
 @commands.cooldown(1, 43200, commands.BucketType.member and commands.BucketType.user)
 async def roubar_banco(ctx, member1: discord.Member = None):
-    #DADOS
-     #DINHEIRO AUTOR
-    sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {ctx.author.id}'
+    await Roubar_banco(ctx, member1=member1)
 
-    cursor.execute(sqlinsert2)
-
-    valores_lidos2 = cursor.fetchone()
-
-    # DINHEIRO DO MEMBER1
-    try:
-        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member1.id}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos3 = cursor.fetchone()
-    except:
-        pass
-
-     #ARMA DO AUTOR
-
-    sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {ctx.author.id}'
-
-    cursor.execute(sqlinsert4)
-
-    valores_lidos4 = cursor.fetchone()
-
-    # ARMA DO MEMBER1
-    try:
-        sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {member1.id}'
-
-        cursor.execute(sqlinsert4)
-
-        valores_lidos5 = cursor.fetchone()
-    except:
-        pass
-
-    #erro de não possuir uma conta
-
-    try:
-        print(valores_lidos2[0])
-    except:
-        await ctx.channel.send(
-            embed=discord.Embed(title='<:error:788824695184424980> **Você não possui uma conta no fênix!!**',
-                                color=0xFF0000))
-        ctx.command.reset_cooldown(ctx)
-        return
-
-    try:
-        if ctx.author == member1:
-            return await ctx.channel.send('<:error:788824695184424980> **Você não pode roubar com si mesmo**')
-            ctx.command.reset_cooldown(ctx)
-
-    except:
-        pass
-
-
-
-
-    #tem certeza?
-
-    if 7 >= valores_lidos4[0] > 0:
-      print('teste')
-      if not member1:
-        embed = discord.Embed(description='**Tem certeza que deseja roubar o banco sozinho? **\n\nVocê pode roubar com até 2 pessoas, e ter mais chance de sucesso!')
-        embed.set_footer(text='escreva Sim ou Não')
-        await ctx.channel.send(embed=embed)
-
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        try:
-            msg25 = await bot.wait_for('message', timeout=100, check=check)
-        except asyncio.TimeoutError:
-            return await ctx.channel.send(
-                f'***Demorou De Mais Para Aceitar {ctx.author.mention}.***')
-            ctx.command.reset_cooldown(ctx)
-        else:
-            resposta25 = str(msg25.content).lower()
-
-        num = random.randint(1, 4)
-
-
-        if resposta25 == 'sim':
-
-            b = await ctx.channel.send(
-                embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
-                                    ))
-
-            await asyncio.sleep(10)
-
-            # possibilidades
-            if num == 1:
-                money1 = random.randint(2500, 15000)
-
-                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] + money1}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                embed1 = discord.Embed(description=f':white_check_mark:  Você conseguiu sair com a grana roubada! **Parabéns {ctx.author.name}!** <a:Top:815388123039006741>',
-                                       color=0x00FF00)
-                embed1.set_footer(text=f'Você recebeu {money1} fenicoins')
-
-                await ctx.channel.send(embed=embed1)
-                return await b.delete()
-
-            if num == 2:
-                money2 = random.randint(2500, 13000)
-
-                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money2}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                embed1 = discord.Embed(
-                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money2} fenicoins**',
-                    color=0xFF0000)
-                embed1.set_footer(text=f'Você perdeu {money2} fenicoins')
-
-                await ctx.channel.send(embed=embed1)
-                return await b.delete()
-
-            if num == 3:
-                money3 = random.randint(2500, 13000)
-
-                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money3}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                embed1 = discord.Embed(
-                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money3} fenicoins**',
-                    color=0xFF0000)
-                embed1.set_footer(text=f'Você perdeu {money3} fenicoins')
-
-                await ctx.channel.send(embed=embed1)
-                return await b.delete()
-
-
-            if num == 4:
-                money4 = random.randint(2500, 13000)
-
-                sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - money4}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                cursor.execute(sqlinsert)
-
-                mydb.commit()
-
-                embed1 = discord.Embed(
-                    description=f'<:error:788824695184424980>  Você foi preso e levou uma multa de **{money4} fenicoins**',
-                    color=0xFF0000)
-                embed1.set_footer(text=f'Você perdeu {money4} fenicoins')
-
-                await ctx.channel.send(embed=embed1)
-                return await b.delete()
-        else:
-            await ctx.channel.send(':white_check_mark: **Roubo cancelado com sucesso!**')
-            ctx.command.reset_cooldown(ctx)
-            return
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não possui uma arma!**')
-        ctx.command.reset_cooldown(ctx)
-        return
-    sqlinsert4 = f'SELECT arma FROM dinheiro WHERE id = {member1.id}'
-
-    cursor.execute(sqlinsert4)
-
-    valores_lidos5 = cursor.fetchone()
-
-
-    #roubar banco com algm
-
-    try:
-        print(valores_lidos3[0])
-    except:
-        await ctx.channel.send(
-            embed=discord.Embed(
-                title=f'<:error:788824695184424980> **O(a) {member1.name} não possui uma conta no fênix!!**',
-                color=0xFF0000))
-        ctx.command.reset_cooldown(ctx)
-        return
-
-    if 7 >= valores_lidos4[0] > 0 or 7 > valores_lidos5[0] > 0:
-
-
-
-      if member1:
-        embed = discord.Embed(description=f'Tem certeza que deseja roubar o banco com o(a) ***{member1.name}*** \n\nVocê pode roubar com até 2 pessoas, e ter mais chance de sucesso!',
-                              color=0x8A2BE2)
-        embed.set_footer(text='escreva Sim ou Não')
-        await ctx.channel.send(embed=embed)
-
-
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        try:
-            msg25 = await bot.wait_for('message', timeout=100.0, check=check)
-        except asyncio.TimeoutError:
-            return await ctx.channel.send(
-                f'***Demorou De Mais Para aceitar {ctx.author.mention}.***')
-            ctx.command.reset_cooldown(ctx)
-        else:
-            resposta25 = str(msg25.content).lower()
-
-        print(resposta25)
-
-
-
-        if resposta25 == 'sim':
-
-
-            #confirmação do member1
-
-            a = await ctx.channel.send(f'**<a:loading:785523240944664646> aguardando o(a) {member1.name} aceitar**')
-
-            embed = discord.Embed(
-                description=f'O(a) **{ctx.author}** quer assaltar um banco com você no servidor **{ctx.author.guild.name}**! \n\nAceita sim ou não? ',
-                color=0x8A2BE2)
-            embed.set_footer(text='escreva Sim ou Não')
-            try:
-                await member1.send(embed=embed)
-            except:
-                await ctx.channel.send(f'<:error:788824695184424980> **Parece que o privado do {member1.name} está privado!! não consigo continuar o roubo assim.')
-                return
-            def check(m):
-                return m.author == ctx.author and m.guild == None
-            try:
-                msg25 = await bot.wait_for('message', timeout=1000.0, check=check)
-            except asyncio.TimeoutError:
-                return await member1.send(
-                    f'***<:error:788824695184424980> Demorou De Mais Para Aceitar {ctx.author.mention}.***')
-                ctx.command.reset_cooldown(ctx)
-            else:
-                resposta26 = str(msg25.content).lower()
-
-            print(resposta26)
-
-            num1 = random.randint(1, 4)
-
-            if resposta26 == 'não':
-                await a.edit(content=f'<:error:788824695184424980> o(a) **{member1.name}** não aceitou!!')
-                ctx.command.reset_cooldown(ctx)
-                return
-
-
-            if resposta26 == 'sim':
-
-                #DIMINUIR RESISTÊNCIA DA ARMA
-
-                if 0 < valores_lidos4[0] <= 7 and 0 >= valores_lidos5[0]:
-                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-                elif 0 < valores_lidos5[0] <= 7 and 0 >= valores_lidos4[0]:
-                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos5[0] - 1}' WHERE id = {member1.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-                else:
-                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos5[0] - 1}' WHERE id = {member1.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-                    sqlinsert = f"UPDATE dinheiro SET arma = '{valores_lidos4[0] - 1}' WHERE id = {ctx.author.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-
-
-                await member1.send(embed=discord.Embed(title=':white_check_mark:   Roubo aceito com sucesso!',
-                                                       color=0x00FF00))
-                # possibilidades
-
-
-
-                if num1 == 1:
-
-                    await asyncio.sleep(3.5)
-
-                    await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
-
-                    await asyncio.sleep(3.5)
-
-                    b = await ctx.channel.send(embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
-                                                                   ))
-
-                    await asyncio.sleep(10)
-
-                    money1 = random.randint(4500, 16000)
-
-                    # Update do dinheiro do autor
-                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] + (money1 / 2)} WHERE id = {ctx.author.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-                    # update do dinheiro do member1
-                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] + (money1 / 2)} WHERE id = {member1.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-                    embed2 = discord.Embed(
-                        description=f':white_check_mark:  Vocês conseguiram sair com **{money1} fenicoins**  roubados! Cada um vai ficar com **{money1 / 2} fenicoins**! **Parabéns {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
-                        color=0x00FF00)
-
-                    await b.edit(embed=embed2)
-
-                elif num1 == 2:
-                        await asyncio.sleep(3.5)
-
-                        await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
-
-                        await asyncio.sleep(3.5)
-
-                        b = await ctx.channel.send(
-                            embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
-                                                ))
-
-                        await asyncio.sleep(10)
-
-                        money1 = random.randint(4500, 16000)
-
-                        # Update do dinheiro do autor
-                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] - (money1 / 2)} WHERE id = {ctx.author.id}"
-
-                        cursor.execute(sqlinsert)
-
-                        mydb.commit()
-
-                        # update do dinheiro do member1
-                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] - (money1 / 2)} WHERE id = {member1.id}"
-
-                        cursor.execute(sqlinsert)
-
-                        mydb.commit()
-
-                        embed2 = discord.Embed(
-                            description=f'<:error:788824695184424980>  Vocês perderam **{money1} fenicoins**  após pagar uma multa por tentar roubar o banco! Cada um vai perder **{money1 / 2} fenicoins**! **valeu a tentativa {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
-                            color=0xFF0000)
-
-                        await b.edit(embed=embed2)
-                elif num1 == 3:
-                        await asyncio.sleep(3.5)
-
-                        await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
-
-                        await asyncio.sleep(3.5)
-
-                        b = await ctx.channel.send(
-                            embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'))
-
-                        await asyncio.sleep(10)
-
-                        money1 = random.randint(4500, 16000)
-
-                        # Update do dinheiro do autor
-                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] - (money1 / 2)} WHERE id = {ctx.author.id}"
-
-                        cursor.execute(sqlinsert)
-
-                        mydb.commit()
-
-                        # update do dinheiro do member1
-                        sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] - (money1 / 2)} WHERE id = {member1.id}"
-
-                        cursor.execute(sqlinsert)
-
-                        mydb.commit()
-
-                        embed2 = discord.Embed(
-                            description=f'<:error:788824695184424980>  Vocês perderam **{money1} fenicoins**  após pagar uma multa por tentar roubar o banco! Cada um vai perder **{money1 / 2} fenicoins**! **valeu a tentativa {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
-                            color=0xFF0000)
-
-                        await b.edit(embed=embed2)
-                else:
-                    await asyncio.sleep(3.5)
-
-                    await a.edit(content=f':white_check_mark: o(a) **{member1.name}** aceitou!!')
-
-                    await asyncio.sleep(3.5)
-
-                    b = await ctx.channel.send(
-                        embed=discord.Embed(title='<a:loading:785523240944664646> Roubando o banco'
-                                            ))
-
-                    await asyncio.sleep(10)
-
-                    money1 = random.randint(4500, 16000)
-
-                    # Update do dinheiro do autor
-                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos3[0] + (money1 / 2)} WHERE id = {ctx.author.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-                    # update do dinheiro do member1
-                    sqlinsert = f"UPDATE dinheiro SET dinheiro = {valores_lidos2[0] + (money1 / 2)} WHERE id = {member1.id}"
-
-                    cursor.execute(sqlinsert)
-
-                    mydb.commit()
-
-                    embed2 = discord.Embed(
-                        description=f':white_check_mark:  Vocês conseguiram sair com **{money1} fenicoins**  roubados! Cada um vai ficar com **{money1 / 2} fenicoins**! **Parabéns {ctx.author.name} e {member1.name}!** <a:Top:815388123039006741>',
-                        color=0x00FF00)
-
-                    await b.edit(embed=embed2)
-            else:
-                await member1.send(embed=discord.Embed(title=':white_check_mark:   Roubo recusado com sucesso!',
-                                                       color=0x00FF00))
-                await a.delete()
-                await ctx.channel.send(embed=discord.Embed(title=f'<:error:788824695184424980> O **{member1.name}** não aceitou o roubo!',
-                                                       color=0xFF0000))
-                ctx.command.reset_cooldown(ctx)
-
-        else:
-            await ctx.channel.send('**<:error:788824695184424980> roubo cancelado**')
-            ctx.command.reset_cooldown(ctx)
-    else:
-        await ctx.channel.send('**<:error:788824695184424980> Parece que você não possui uma arma!**')
-        ctx.command.reset_cooldown(ctx)
 
 @roubar_banco.error
 async def banco_error(ctx, error):
@@ -1244,34 +747,7 @@ async def apostar_error(ctx, error):
 @commands.guild_only()
 @commands.check(check_ban)
 async def add_suporte(ctx, member: discord.Member = None):
-    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
-        pessoa = member.id
-        sqlinsert2 = f'SELECT permmissão FROM admin WHERE id = {pessoa}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos2 = cursor.fetchone()
-        try:
-            print(valores_lidos2[0])
-            await ctx.channel.send('<:error:788824695184424980> **Esse usuário já faz parte da equipe de suporte**')
-            return
-        except:
-
-            inserir = 'INSERT INTO admin (id, permmissão) VALUES (%s, %s)'
-            dados = (pessoa, 'sim')
-            cursor.execute(inserir, dados)
-            mydb.commit()
-            await ctx.channel.send(':white_check_mark: **Adicionado na suporte com sucesso!**')
-
-            embed1 = discord.Embed(title='Parabéns',
-                                description='Agora você faz parte do suporte do fênix!!',
-                                color=0xFFFF00)
-            embed1.set_thumbnail(url='https://media.discordapp.net/attachments/778295088753016903/787245337295060992/1607735746221.png')
-            embed1.set_footer(text=f'Recrutado em:{x.day}/{x.month}/{x.year} ')
-            await member.send(embed=embed1)
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não possui permissão para dar esse comando!**')
-
+    await Add_suporte(ctx, member=member)
 
 
 
@@ -1280,245 +756,61 @@ async def add_suporte(ctx, member: discord.Member = None):
 @commands.guild_only()
 @commands.check(check_ban)
 async def remove_suporte(ctx, member: discord.Member = None):
-    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
-        pessoa = member.id
-        inserir = f'DELETE FROM admin WHERE id = {pessoa}'
-        cursor.execute(inserir)
-        mydb.commit()
-        await ctx.channel.send(':white_check_mark: **Removido na suporte com sucesso!**')
+    await Remove_suporte(ctx, member=member)
 
-        embed1 = discord.Embed(title='Que triste',
-                              description='Você não faz mais parte do suporte do fênix.',
-                              color=0xFFFF00)
-        embed1.set_thumbnail(url='https://media.discordapp.net/attachments/778295088753016903/787245337295060992/1607735746221.png')
-        embed1.set_footer(text=f'Removido em:{x.day}/{x.month}/{x.year} ')
-        await member.send(embed=embed1)
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não possui permissão para dar esse comando!**')
 
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
 async def identificar(ctx, member: discord.Member = None):
-    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+    await Identificar(ctx, member=member)
 
-    cursor.execute(sqlinsert3)
-
-    valores_lidos3 = cursor.fetchone()
-    try:
-      if valores_lidos3[0] == 'sim':
-        sqlinsert2 = f'SELECT permmissão FROM admin WHERE id = {member.id}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos2 = cursor.fetchone()
-
-        try:
-            if valores_lidos2[0] == 'sim':
-                await ctx.channel.send(f':white_check_mark: **{member} faz parte da equipe de suporte**')
-
-        except:
-            await ctx.channel.send('<:error:788824695184424980> **Esse membro não faz parte da equipe suporte **')
-    except:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
 
 
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
 async def clean_fenix(ctx, amount=10):
-    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
+    await Clean_fenix(ctx,amount=amount)
 
-    cursor.execute(sqlinsert3)
-
-    valores_lidos3 = cursor.fetchone()
-    try:
-        if valores_lidos3[0] == 'sim':
-            def is_me(m):
-                return m.author == bot.user
-
-            deleted = await ctx.channel.purge(limit=amount + 1, check=is_me)
-            await ctx.channel.send(':white_check_mark: **deletado {} mensagens do fênix nesse canal**'.format(amount))
-        else:
-            await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para dar esse comando**')
-    except:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
 
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
 @commands.cooldown(1, 20, commands.BucketType.user)
 async def ajuda_suporte(ctx):
-    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
-
-    cursor.execute(sqlinsert3)
-
-    valores_lidos3 = cursor.fetchone()
-    try:
-      if valores_lidos3[0] == 'sim':
-        embed = discord.Embed(
-            title='**<a:Top:815388123039006741>Painel Suporte Fênix<a:Top:815388123039006741>**',
-            color=color,
-            description='***Comandos da equipe suporte:***\n\n`identificar (@user)` : identificar quem é da equipe de suporte\n`add_fenicoins` : Adicionar fenicoin em alguém\n`remove_fenicoins` : Remover fenicoin de alguém\n`set_fenicoins` : Setar fenicoins em alguèm\n`clean_fenix (valor)` : Limpa mensagens do fênix em um canal\n`add_suporte (@user)` : adicionar alguém na suporte\n`remove_suporte` : remover alguém da equipe de suporte\n`ban_fenix (id/user) (motivo)`\n`unban_fenix (id/user)`')
-        embed.set_thumbnail(url='https://media.discordapp.net/attachments/787270440283406399/787289422164131870/1607735746221.png')
-
-        await ctx.channel.send(ctx.author.mention, embed=embed)
-        await ctx.message.delete()
-    except:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+    await Ajuda_suporte(ctx)
 
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
 async def add_fenicoins(ctx, member: discord.Member, valor: int):
-    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
-        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos2 = cursor.fetchone()
-
-        try:
-            print(valores_lidos2[0])
-        except:
-            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
-                                                       color=0xFF0000))
-            return
-
-        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] + valor}' WHERE id = {member.id}"
-
-        cursor.execute(sqlinsert)
-
-        mydb.commit()
-        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Adicionado {valor} *fenicoins* para o(a) {member}',
-                                                   color=0x00FF00))
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+    await Add_fenicoins(ctx, member=member, valor=valor)
 
 @bot.command()
 @commands.guild_only()
 async def remove_fenicoins(ctx, member: discord.Member, valor: int):
-    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
-        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos2 = cursor.fetchone()
-
-        try:
-            print(valores_lidos2[0])
-        except:
-            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
-                                                       color=0xFF0000))
-            return
-
-        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valores_lidos2[0] - valor}' WHERE id = {member.id}"
-
-        cursor.execute(sqlinsert)
-
-        mydb.commit()
-        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Removido {valor} *fenicoins* do(a) {member}',
-                                                   color=0xFF0000))
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
+    await Remove_fenicoins(ctx, member=member, valor=valor)
 
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
 async def set_fenicoins(ctx, member: discord.Member, valor: int):
-    if ctx.author.id == 567757366506815488 or ctx.author.id == 597777716011335682:
+    await Set_fenicoins(ctx, member=member, valor=valor)
 
-        sqlinsert2 = f'SELECT dinheiro FROM dinheiro WHERE id = {member.id}'
-
-        cursor.execute(sqlinsert2)
-
-        valores_lidos2 = cursor.fetchone()
-
-        try:
-            print(valores_lidos2[0])
-        except:
-            await ctx.channel.send(embed=discord.Embed(title='<:error:788824695184424980> **Esse usuário não possui uma conta no fênix!!**',
-                                                       color=0xFF0000))
-            return
-
-        sqlinsert = f"UPDATE dinheiro SET dinheiro = '{valor}' WHERE id = {member.id}"
-
-        cursor.execute(sqlinsert)
-
-        mydb.commit()
-        await ctx.channel.send(embed=discord.Embed(title=f':white_check_mark: Setado {valor} *fenicoins* no(a) {member}',
-                                                   color=0x00FF00))
-    else:
-        await ctx.channel.send('<:error:788824695184424980> **Você não tem permissão para usar esse comando**')
 
 
 @bot.command()
 @commands.check(check_ban)
 async def ban_fenix(ctx, member, *, motivo: str = 'Motivo não especificado!'):
+    await Ban_fenix(ctx, member=member, motivo=motivo)
 
-    if member == 567757366506815488:
-        return
-
-    member = await bot.fetch_user(int(member))
-
-    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
-
-    cursor.execute(sqlinsert3)
-
-    valores_lidos3 = cursor.fetchone()
-    if valores_lidos3[0] == 'sim':
-        inserir = 'INSERT INTO ban (idban, motivo) VALUES (%s, %s)'
-        dados = (int(member.id), motivo)
-        try:
-            cursor.execute(inserir, dados)
-            mydb.commit()
-
-            await ctx.send("***Usuário banido com sucesso!*** \n"
-                           f"**motivo:** {motivo}\n"
-                           f"**Tempo:** Permanente!")
-        except:
-            return await ctx.send("**Este usuário já está banido!**")
-
-        embed1 = discord.Embed(title=f':no_entry_sign:Você foi banido do fênix',
-                               description=f'**:police_officer:Banido por:**\n{ctx.author}\n:pencil:**Motivo:**\n{motivo}',
-                               color=0xFF0000,
-                               timestamp=datetime.datetime.utcnow())
-        embed1.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
-
-
-        await member.send(embed=embed1)
-
-    else:
-        return
 
 @bot.command()
 @commands.check(check_ban)
 async def unban_fenix(ctx, member: int):
-    if member == 567757366506815488:
-        return
+    await Unban_fenix(ctx, member=member)
 
-    member = await bot.fetch_user(int(member))
-
-    sqlinsert3 = f'SELECT permmissão FROM admin WHERE id = {ctx.author.id}'
-
-    cursor.execute(sqlinsert3)
-
-    valores_lidos3 = cursor.fetchone()
-    if valores_lidos3[0] == 'sim':
-        inserir = f'DELETE FROM ban WHERE idban = {member.id}'
-        cursor.execute(inserir)
-        mydb.commit()
-
-        embed1 = discord.Embed(title=f':no_entry_sign:Você foi Desbanido do fênix',
-                               description=f'**:police_officer:Desbanido por:**\n{ctx.author}',
-                               color=0xFF0000,
-                               timestamp=datetime.datetime.utcnow())
-        embed1.set_thumbnail(
-            url='https://media.discordapp.net/attachments/788064370722340885/788170896363618345/1607735746221.png')
-
-
-        await ctx.send('Desbanido!')
-        await member.send(embed=embed1)
 
 
 #----------------------------------------------------------------------------------------------------------------
