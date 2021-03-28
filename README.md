@@ -13,3 +13,7 @@
  - [ ] Otimizar o código.
 
  - [ ] Melhorar as Embeds.
+
+```python
+print('Com calma e esforço, chegaremos ao nosso fito!')
+```
