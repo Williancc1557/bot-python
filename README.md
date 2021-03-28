@@ -2,7 +2,7 @@
 
  Programado totalmente em python!! 
  
- Banco de Dados **SQL**
+ Banco de Dados **elephantSQL**
 
 
  
@@ -17,4 +17,6 @@
 ```py
 print('Com calma e esforço, chegaremos ao nosso fito!')
 ```
+
+
 
