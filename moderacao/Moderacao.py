@@ -481,6 +481,9 @@ async def Embed(ctx):
             '<:error:788824695184424980> Você não possui um cargo com a **permissão** de ***gerenciar mensagens***.')
 
 
+
+
+
 async def Limpar(ctx, amount: int = None):
     if ctx.message.author.guild_permissions.manage_messages or ctx.author == ctx.guild.owner:
         if not amount:
@@ -488,9 +491,10 @@ async def Limpar(ctx, amount: int = None):
                 title='<a:lixo:818920412233859083> Comando para apagar mensagens do chat!! <a:lixo:818920412233859083>\n'
                       '\n'
                       '`f!limpar`\nㅤ',
-                description='Esse comandinho serve para você **limpar** o seu chat do discord!\nㅤ',
-                color=0x00BFFF)
+                description='Seu chat do discord está com muita mensagem? Então utilize esse comando! <:kaway:825740909177077851>\nㅤ',
+                color=0x9400D3)
             embed.add_field(name='📚 Como usar', value='`f!limpar <quantidade>`')
+            embed.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/825745566591221790/lixin.gif')
 
             return await ctx.channel.send(embed=embed)
 
@@ -526,6 +530,9 @@ async def Limpar(ctx, amount: int = None):
 
 
 async def Warn(ctx, member: discord.Member = None, *, motivo: str = 'Motivo Não Especificado!'):
+
+    #CHECKS
+
     if ctx.author == member:
         return await ctx.reply(
             f'<:error:788824695184424980>| {ctx.author.mention} Você não pode dar warn para **Si Mesmo!**')
@@ -550,16 +557,19 @@ async def Warn(ctx, member: discord.Member = None, *, motivo: str = 'Motivo Não
     except:
         pass
 
+    #MEMBER = NONE
+
     if member == None:
         embed = discord.Embed(
             title='<a:warn:818918476915540020> Comando para dar warn em um membro!! <a:warn:818918476915540020>\n'
                   '\n'
                   '`f!warn`\nㅤ',
-            description='Esse comandinho serve para você **penalizar** algum membro! \n'
+            description='Tem alguém fazendo **Algo de Errado** no servidor? Utilize esse comando então, quero ver ele(a) continuar bagunçando <:hmm:825743465086058526>\n'
                         '\n'
                         '*Obs: 3 warns = ban*\nㅤ',
-            color=0x00BFFF)
+            color=0x9400D3)
         embed.add_field(name='📚 Como usar', value='`f!warn <@WiLL> <Motivo>`')
+        embed.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/825749587737313331/1616944371886.png')
 
         return await ctx.reply(embed=embed)
 
@@ -570,6 +580,8 @@ async def Warn(ctx, member: discord.Member = None, *, motivo: str = 'Motivo Não
     verifict = cursor.fetchone()
 
     print(verifict)
+
+    #   Código
 
     if verifict == None:
 
@@ -664,9 +676,28 @@ async def Warn(ctx, member: discord.Member = None, *, motivo: str = 'Motivo Não
 
 async def Warn_remove(ctx, member: discord.Member):
 
+    if ctx.message.author.guild_permissions.ban_members or ctx.author == ctx.guild.owner:
+        pass
+    else:
+        return await ctx.reply(
+            f'<:error:788824695184424980>| {ctx.author.mention} Você precisa ter um cargo com a permissão de **Banir Membros!**')
 
+
+    #MEMBER = None
     if not member:
-        return await ctx.reply('<:error:788824695184424980>| Escreva no seguinte formato `f!warn_remove <@member>`')
+        embed = discord.Embed(
+            title='<a:warn:818918476915540020> Comando para *Visualizar* Warn(s)!! <a:warn:818918476915540020>\n'
+                  '\n'
+                  '`f!warn_remove`\nㅤ',
+            description='Deseja **Remover** alguma penalização? Então utilize esse comando para a remoção da mesma  <:kaway:825740909177077851>  \n',
+            color=0x9400D3)
+        embed.add_field(name='📚 Como usar', value='`f!warn_remove <@WiLL>`')
+        embed.set_thumbnail(
+            url='https://media.discordapp.net/attachments/788064370722340885/825749587737313331/1616944371886.png')
+
+        return await ctx.reply(embed=embed)
+
+
     sqlinsert3 = f'SELECT * FROM warn WHERE idserv = {member.guild.id} AND iduser = {member.id}'
 
     cursor.execute(sqlinsert3)
@@ -677,11 +708,7 @@ async def Warn_remove(ctx, member: discord.Member):
         return await ctx.reply(
             '<:error:788824695184424980>| Esse membro **Não Possui** warn nesse servidor!')
 
-    if ctx.message.author.guild_permissions.ban_members or ctx.author == ctx.guild.owner:
-        pass
-    else:
-        return await ctx.reply(
-            f'<:error:788824695184424980>| {ctx.author.mention} Você precisa ter um cargo com a permissão de **Banir Membros!**')
+
 
     if ctx.author == member:
         return await ctx.reply(
@@ -727,7 +754,18 @@ async def Check_warns(ctx, member: discord.Member = None):
 
 
     if not member:
-        return await ctx.reply('<:error:788824695184424980>| Escreva no seguinte formato `f!check_warns <@member>`')
+        if not member:
+            embed = discord.Embed(
+                title='<a:warn:818918476915540020> Comando para *Retirar* Warn(s)!! <a:warn:818918476915540020>\n'
+                      '\n'
+                      '`f!warn_check`\nㅤ',
+                description='Deseja ver a **Quantidade** de warn de alguém? Então utilize esse comando.  \n',
+                color=0x9400D3)
+            embed.add_field(name='📚 Como usar', value='`f!warn_check <@WiLL>`')
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/825749587737313331/1616944371886.png')
+
+            return await ctx.reply(embed=embed)
 
     sqlinsert3 = f'SELECT * FROM warn WHERE idserv = {member.guild.id} AND iduser = {member.id}'
 
@@ -758,12 +796,19 @@ async def Check_warns(ctx, member: discord.Member = None):
 async def Mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=None):
 
         if ctx.message.author.guild_permissions.kick_members or ctx.author == ctx.guild.owner:
-            if not member:
-                return await ctx.reply("**<:error:788824695184424980>| Escreva no formato** `f!mute (@pessoa) (tempo) (segundos, minutos, horas)`")
 
-            if not mute_minutes:
-                return await ctx.reply(
-                    "**<:error:788824695184424980>| Escreva no formato** `f!mute (@pessoa) (tempo) (segundos, minutos, horas)`")
+            if not mute_minutes or not unit or not member:
+                embed = discord.Embed(
+                    title='<a:muted:815317083427569665> Comando para *Mutar usuários*!! <a:muted:815317083427569665>\n'
+                          '\n'
+                          '`f!mute`\nㅤ',
+                    description='Deseja **Mutar** alguém? Então utilize esse comando.  \n',
+                    color=0x9400D3)
+                embed.add_field(name='📚 Como usar', value='`f!mute <@WiLL> <temp> <horas, minutos, segundos>`')
+                embed.set_thumbnail(
+                    url='https://media.discordapp.net/attachments/788064370722340885/825769140248772658/muted.gif')
+
+                return await ctx.reply(embed=embed)
             if member == ctx.guild.owner:
                 return await ctx.reply('<:error:788824695184424980>| Não posso banir o **Dono** do servidor! seu bobo')
             try:
@@ -774,8 +819,6 @@ async def Mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=N
                     f'<:error:788824695184424980>| **{ctx.author.mention} Seu cargo é menor ou igual que o do {member.mention}**')
             except:
                 pass
-            if not unit:
-                return await ctx.reply("**<:error:788824695184424980>| Escreva no formato** `f!mute (@pessoa) (tempo) (segundos, minutos, horas)`")
 
             role = discord.utils.find(lambda r: r.name == "Mutado", ctx.guild.roles)
             if not role:
@@ -944,7 +987,17 @@ async def Mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=N
 async def Unmute(ctx, member: discord.Member = None):
     if ctx.message.author.guild_permissions.kick_members or ctx.author == ctx.guild.owner:
         if not member:
-            return await ctx.reply("Escreva no formato `f!unmute (@pessoa)`")
+            embed = discord.Embed(
+                title='<a:muted:815317083427569665> Comando para *Desmutar usuários*!! <a:muted:815317083427569665>\n'
+                      '\n'
+                      '`f!unmute`\nㅤ',
+                description='Deseja **Desmutar** alguém? Então utilize esse comando.  \n',
+                color=0x9400D3)
+            embed.add_field(name='📚 Como usar', value='`f!unmute <@WiLL>`')
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/825769140248772658/muted.gif')
+
+            return await ctx.reply(embed=embed)
 
         if member.top_role < ctx.author.top_role or ctx.author == ctx.guild.owner:
             editar = await ctx.reply(f'<a:loading:785523240944664646>  **Desmutando o(a) {member.mention}!**')
@@ -974,9 +1027,17 @@ async def Ban(ctx, member: discord.Member, *, reason='*Motivo não especificado*
     if ctx.message.author.guild_permissions.ban_members or ctx.author == ctx.guild.owner:
 
             if not member:
-                return await ctx.channel.send(
-                        '<:error:788824695184424980>| **Rescreva o comando no seguinte formato:** `f!ban (@user) (Motivo)`')
+                embed = discord.Embed(
+                    title='<a:ban:815316725402566666> Comando para *Banir*!! <a:ban:815316725402566666>\n'
+                          '\n'
+                          '`f!ban`\nㅤ',
+                    description='Deseja **Banir** aquele membro chato? Então utilize esse comando.  \n',
+                    color=0x9400D3)
+                embed.add_field(name='📚 Como usar', value='`f!ban <@WiLL> motivo`')
+                embed.set_thumbnail(
+                    url='https://media.discordapp.net/attachments/788064370722340885/825772453187682334/banned.gif')
 
+                return await ctx.reply(embed=embed)
             if member == bot.user:
                 return await ctx.channel.send('<:error:788824695184424980>| Não posso me **banir** bobinho kk.')
 
@@ -1032,15 +1093,24 @@ async def Ban(ctx, member: discord.Member, *, reason='*Motivo não especificado*
 
 async def Unban(ctx, id: int):
     if not id:
-        return await ctx.channel.send(
-            '<:error:788824695184424980>| **Rescreva o comando no seguinte formato:** `f!unban (ID)`')
+        embed = discord.Embed(
+            title='<a:ban:815316725402566666> Comando para *Desbanir*!! <a:ban:815316725402566666>\n'
+                  '\n'
+                  '`f!unban`\nㅤ',
+            description='Deseja **Desbanir** alguem? Então utilize esse comando.  \n',
+            color=0x9400D3)
+        embed.add_field(name='📚 Como usar', value='`f!unban <user_id>`')
+        embed.set_thumbnail(
+            url='https://media.discordapp.net/attachments/788064370722340885/825772453187682334/banned.gif')
+
+        return await ctx.reply(embed=embed)
     if ctx.message.author.guild_permissions.ban_members or ctx.author == ctx.guild.owner:
         user = await bot.fetch_user(id)
         try:
             await ctx.guild.unban(user)
         except:
             return await ctx.reply(f'<:error:788824695184424980>| Não encontrei **Nenhum** usuário com o id {id}')
-        await ctx.message.delete()
+
         embed40 = discord.Embed(title=':white_check_mark:  **Membro Desbanido**',
                                 color=0xFF0000,
                                 timestamp=datetime.datetime.utcnow())

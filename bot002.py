@@ -110,14 +110,12 @@ async def coinflip(ctx, bet: str = None):
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
-async def ban(ctx, member: discord.Member, *, reason = '*Motivo não especificado*'):
+async def ban(ctx, member: discord.Member = None, *, reason = '*Motivo não especificado*'):
     return await Ban(ctx, member=member, reason=f'{reason}')
 
 @ban.error
 async def on_ban_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-         await ctx.reply(
-            '<:error:788824695184424980>| **Reescreva** o comando no seguinte formato `f!ban <@user> <Motivo>`')
+
 
     if isinstance(error, commands.MemberNotFound):
         await ctx.reply(f'<:error:788824695184424980>| Não encontrei o `{error.argument}` em lugar algum!')
@@ -131,14 +129,10 @@ async def on_ban_error(ctx, error):
 @bot.command()
 @commands.guild_only()
 @commands.check(check_ban)
-async def unban(ctx, id: int):
+async def unban(ctx, id: int = None):
     await Unban(ctx, id=id)
 
-@unban.error
-async def on_unban_error(ctx, error):
 
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.reply('<:error:788824695184424980>| **Reescreva** o comando no seguinte formato `f!unban <user_id>`')
 
                                                    #convidar o bot
 
@@ -164,7 +158,7 @@ async def invite(ctx, error):
 @commands.guild_only()
 @commands.check(check_ban)
 async def mute(ctx, member: discord.Member = None, mute_minutes: int = 0, unit=None):
-    await Mute(ctx, member, mute_minutes, unit)
+    await Mute(ctx, member=member, mute_minutes=mute_minutes, unit=unit)
 
 
 
@@ -326,7 +320,7 @@ async def warn_remove_error(ctx, error):
 
 
 
-@bot.command(name='check_warns', aliases=['warns_check', 'w_c', 'check_warn'])
+@bot.command(name='check_warns', aliases=['warns_check', 'w_c', 'check_warn', 'warn_check'])
 @commands.check(check_ban)
 @commands.guild_only()
 async def check_warns(ctx, member: discord.Member = None):
@@ -362,14 +356,20 @@ async def embed(ctx):
 
                                                      #painel de ajuda:
 
+
 bot.reactions = {}
+async def delete(ctx, msg):
+    await asyncio.sleep(150)
+
+    await msg.delete()
+    bot.reactions.pop(str(msg.id))
 @bot.command(name='ajuda', aliases=['help', 'Help', 'HELP'])
 @commands.guild_only()
 @commands.check(check_ban)
 @commands.cooldown(1, 15, commands.BucketType.user)
 async def ajuda(ctx):
     embed = discord.Embed(
-        title='*** Olá, meu nome é Fênix 🐦***',
+        title='*Olá, meu nome é Fênix 🐦*',
         description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
                     '\n'
                     '\n'
@@ -390,7 +390,7 @@ async def ajuda(ctx):
     embed.set_thumbnail(
         url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
 
-    global msg
+
     msg = await ctx.reply(ctx.author.mention, embed=embed)
 
     await msg.add_reaction('<a:emoji_42:815378184219918336>')
@@ -399,12 +399,13 @@ async def ajuda(ctx):
     await msg.add_reaction('<a:emoji_45:815378376528887859>')
     await msg.add_reaction('<a:seta:796356802760933387>')
 
+
+
     bot.reactions[str(msg.id)] = ctx.author
 
-    await asyncio.sleep(200)
+    await delete(ctx, msg=msg)
 
-    await msg.delete()
-    bot.reactions.pop(str(msg.id))
+
 
 @ajuda.error
 async def ajuda_error(ctx, error):
@@ -933,7 +934,7 @@ async def on_reaction_add(reaction, user):
 
         if autor == user and react == '<a:seta:796356802760933387>':
             embed = discord.Embed(
-                title='*** Olá, meu nome é Fênix 🐦***',
+                title='*Olá, meu nome é Fênix 🐦*',
                 description='Fui criado com o objetivo de ajudar os servidores tanto na moderação quanto na diversão!!\n'
                             '\n'
                             '\n'
