@@ -8,7 +8,7 @@
  
 ## Lista de Tarefas 
 
- - [ ] Separar o Fênix em __Arquivos!__
+ - [x] Separar o Fênix em __Arquivos!__
 
  - [ ] Otimizar o código.
 
