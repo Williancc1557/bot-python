@@ -495,8 +495,9 @@ async def Limpar(ctx, amount: int = None):
                 color=0x9400D3)
             embed.add_field(name='📚 Como usar', value='`f!limpar <quantidade>`')
             embed.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/825745566591221790/lixin.gif')
-
+            ctx.command.reset_cooldown(ctx)
             return await ctx.reply(embed=embed)
+
 
         if amount + 1 > 101:
             return await ctx.channel.send('<:error:788824695184424980>| Não posso apagar mais que **100 mensagens**')
@@ -1026,69 +1027,102 @@ async def Unmute(ctx, member: discord.Member = None):
 async def Ban(ctx, member: discord.Member, *, reason='*Motivo não especificado*'):
     if ctx.message.author.guild_permissions.ban_members or ctx.author == ctx.guild.owner:
 
-            if not member:
-                embed = discord.Embed(
-                    title='<a:ban:815316725402566666> Comando para *Banir*!! <a:ban:815316725402566666>\n'
-                          '\n'
-                          '`f!ban`\nㅤ',
-                    description='Deseja **Banir** aquele membro chato? Então utilize esse comando.\nㅤ',
-                    color=0x9400D3)
-                embed.add_field(name='📚 Como usar', value='`f!ban <@WiLL> motivo`')
-                embed.set_thumbnail(
-                    url='https://media.discordapp.net/attachments/788064370722340885/825772453187682334/banned.gif')
+        if not member:
+            embed = discord.Embed(
+                title='<a:ban:815316725402566666> Comando para *Banir*!! <a:ban:815316725402566666>\n'
+                      '\n'
+                      '`f!ban`\nㅤ',
+                description='Deseja **Banir** aquele membro chato? Então utilize esse comando.\nㅤ',
+                color=0x9400D3)
+            embed.add_field(name='📚 Como usar', value='`f!ban <@WiLL> motivo`')
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/825772453187682334/banned.gif')
 
-                return await ctx.reply(embed=embed)
-            if member == bot.user:
-                return await ctx.channel.send('<:error:788824695184424980>| Não posso me **banir** bobinho kk.')
+            return await ctx.reply(embed=embed)
+        if member == bot.user:
+            return await ctx.channel.send('<:error:788824695184424980>| Não posso me **banir** bobinho kk.')
 
-            if member == ctx.guild.owner:
-                return await ctx.reply('<:error:788824695184424980>| Não posso banir o **Dono** do servidor! seu bobo')
+        if member == ctx.guild.owner:
+            return await ctx.reply('<:error:788824695184424980>| Não posso banir o **Dono** do servidor! seu bobo')
 
-            if member.top_role < ctx.author.top_role or ctx.author == ctx.guild.owner:
+        if member.top_role < ctx.author.top_role or ctx.author == ctx.guild.owner:
 
-                embed1 = discord.Embed(title=f':no_entry_sign:Você foi banido do {member.guild.name}',
-                                        description=f'**:police_officer:Banido por:**\n{ctx.author.display_name}\n:pencil:**Motivo:**\n{reason}',
-                                        color=0xFF0000,
-                                        timestamp=datetime.datetime.utcnow())
-                embed1.set_thumbnail(url=member.guild.icon_url)
+            msg = await ctx.reply(f'<a:warn:818918476915540020> Deseja realmente **Banir** o(a) `{member}`?\n'
+                                  f'\n'
+                                  f'**Motivo:** {reason}\n'
+                                  '\n'
+                                  '**Caso realmente deseja banir essa pessoa, clique na reação** <a:verificao_1:815313840354361384>.\n'
+                                  '**Não quer mais banir essa pessoa? Clique na reação** <:error:788824695184424980>'
 
-                try:
-                    await member.ban(reason=reason)
-                except:
-                    return await ctx.reply('<:error:788824695184424980>| Por algum motivo eu **Não Consegui** banir essa pessoa!')
+                                  )
+            await msg.add_reaction('<a:verificao_1:815313840354361384>')
 
-                try:
-                    await member.send(embed=embed1)
+            await msg.add_reaction('<:error:788824695184424980>')
 
+            def check(reaction, user):
+                print(reaction)
+                return ctx.author == user and str(
+                    reaction) == '<a:verificao_1:815313840354361384>' or ctx.author == user and str(
+                    reaction) == '<:error:788824695184424980>'
 
-                except:
-                    pass
-
-                embed2 = discord.Embed(title=f':no_entry_sign: Membro {member} banido com sucesso!',
-                                       description=f'**:police_officer:Banido por:**\n{ctx.author}\n:pencil:**Motivo:**\n{reason}',
-                                       color=0x00FF00,
-                                       timestamp=datetime.datetime.utcnow())
-                num = random.randint(1, 2)
-
-                if num == 1:
-                    embed2.set_image(url='https://media.discordapp.net/attachments/778295088753016903/785811979088429067/07155146350102.gif?width=617&height=473')
-                if num == 2:
-                    embed2.set_image(url='https://media.discordapp.net/attachments/778295088753016903/785816768533889034/ban1.gif')
-                embed2.set_thumbnail(url=ctx.author.guild.icon_url)
-
-                a = await ctx.reply(embed=embed2)
-
-                await asyncio.sleep(25)
-                await a.delete()
-                return False
-
-
+            try:
+                reaction, user = await bot.wait_for('reaction_add', check=check, timeout=50)
+            except asyncio.TimeoutError:
+                return
             else:
-                return await ctx.channel.send(
-                    f'<:error:788824695184424980>| {ctx.author.mention}**Seu cargo é menor ou igual que o do {member.mention}**')
+                print(reaction, user)
+
+            if str(reaction) == '<a:verificao_1:815313840354361384>':
+                pass
+            else:
+                return await msg.delete()
+
+            embed1 = discord.Embed(title=f':no_entry_sign:Você foi banido do {member.guild.name}',
+                                   description=f'**:police_officer:Banido por:**\n{ctx.author.display_name}\n:pencil:**Motivo:**\n{reason}',
+                                   color=0xFF0000,
+                                   timestamp=datetime.datetime.utcnow())
+            embed1.set_thumbnail(url=member.guild.icon_url)
+            await msg.delete()
+            try:
+                await member.ban(reason=reason)
+            except:
+                return await ctx.reply(
+                    '<:error:788824695184424980>| Por algum motivo eu **Não Consegui** banir essa pessoa!')
+
+            try:
+                await member.send(embed=embed1)
+
+
+            except:
+                pass
+
+            embed2 = discord.Embed(title=f':no_entry_sign: Membro {member} banido com sucesso!',
+                                   description=f'**:police_officer:Banido por:**\n{ctx.author}\n:pencil:**Motivo:**\n{reason}',
+                                   color=0x00FF00,
+                                   timestamp=datetime.datetime.utcnow())
+            num = random.randint(1, 2)
+
+            if num == 1:
+                embed2.set_image(
+                    url='https://media.discordapp.net/attachments/778295088753016903/785811979088429067/07155146350102.gif?width=617&height=473')
+            if num == 2:
+                embed2.set_image(
+                    url='https://media.discordapp.net/attachments/778295088753016903/785816768533889034/ban1.gif')
+            embed2.set_thumbnail(url=ctx.author.guild.icon_url)
+
+            a = await ctx.reply(embed=embed2)
+
+            await asyncio.sleep(25)
+            await a.delete()
+            return False
+
+
+        else:
+            return await ctx.channel.send(
+                f'<:error:788824695184424980>| {ctx.author.mention}**Seu cargo é menor ou igual que o do {member.mention}**')
     else:
         return await ctx.channel.send(
-            '**<:error:788824695184424980>| Você precisa ter um cargo com a **Permissão** de banir membros!**')
+            '<:error:788824695184424980>| Você precisa ter um cargo com a **Permissão** de *Banir Membros!*')
 
 
 async def Unban(ctx, id: int):
