@@ -1068,7 +1068,7 @@ async def Ban(ctx, member: discord.Member, *, reason='*Motivo não especificado*
             try:
                 reaction, user = await bot.wait_for('reaction_add', check=check, timeout=50)
             except asyncio.TimeoutError:
-                return
+                return False
             else:
                 print(reaction, user)
 
