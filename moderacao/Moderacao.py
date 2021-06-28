@@ -512,9 +512,7 @@ async def Limpar(ctx, amount: int = None):
                 Apagado = await ctx.channel.send(
                     f'**<a:lixo:818920412233859083>| {ctx.author.mention} apagou {int(len(a)) - 1} mensagen(s)**')
 
-                await asyncio.sleep(20)
 
-                await Apagado.delete()
 
             else:
                 Apagado = await ctx.channel.send(
@@ -522,9 +520,9 @@ async def Limpar(ctx, amount: int = None):
                     f'\n'
                     f'<a:warn:818918476915540020> Parece que não consegui apagar a quantidade de **Mensagens Desejada**, provavelmente, ou o chat não possui mensagens para ser apagadas, ou as mensagens são muito antigas!')
 
-                await asyncio.sleep(20)
+            await asyncio.sleep(20)
 
-                await Apagado.delete()
+            await Apagado.delete()
     else:
         return await ctx.reply(
             f'<:error:788824695184424980>| {ctx.author.mention}Você não possui um cargo com **Permissão** de *Gerenciar Mensagens*')

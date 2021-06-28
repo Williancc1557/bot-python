@@ -29,23 +29,21 @@ async def On_command_error(ctx, error):
         print(error)
 
 
-
 async def On_message(message):
     if bot.user.mentioned_in(message):
         if f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content:
             embed = discord.Embed(title="Olá, meu nome é Fênix! 🐦",
-                                                       description='📖 Utilize `f!ajuda` para mais **informações**',
-                                                       color=0xff00ff)
+                                  description='📖 Utilize `f!ajuda` para mais **informações**',
+                                  color=0xff00ff)
             embed.add_field(name='Servidor Suporte', value='[Suporte](https://discord.gg/VDTAt3Qb9X)')
-            embed.set_thumbnail(url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
+            embed.set_thumbnail(
+                url='https://media.discordapp.net/attachments/788064370722340885/823220448351354910/20210317_111410.jpg?width=650&height=650')
 
             msg = await message.channel.send(embed=embed)
             await asyncio.sleep(8)
             await msg.delete()
 
-
     await bot.process_commands(message)
-
 
 
 async def On_ready():
@@ -87,6 +85,7 @@ async def On_guild_remove(guild):
     inserir = f'DELETE FROM logs WHERE idserv = {guild.id}'
     cursor.execute(inserir)
     mydb.commit()
+
 
 async def On_member_join(member):
     sqlinsert3 = f'SELECT mensagem FROM welcome WHERE idserv = {member.guild.id}'
@@ -192,3 +191,6 @@ async def On_guild_join(guild):
 
     else:
         pass
+
+async def On_message_edit(before, after):
+    await bot.process_commands(after)
